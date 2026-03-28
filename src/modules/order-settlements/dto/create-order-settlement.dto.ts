@@ -17,8 +17,8 @@ export const createOrderSettlementSchema = z.object({
   currency: z.string().trim().min(1),
   amount: z.string().trim().min(1),
   note: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
-  dueAt: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
-  paidAt: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
+  dueAt: z.preprocess(emptyToUndefined, z.string().optional()),
+  paidAt: z.preprocess(emptyToUndefined, z.string().optional()),
 })
 
 export class CreateOrderSettlementDto extends createZodDto(createOrderSettlementSchema) {}

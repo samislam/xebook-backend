@@ -41,7 +41,7 @@ export class TransactionsService {
           currency,
           referenceCode: dto.referenceCode,
           note: dto.note,
-          occurredAt: dto.occurredAt,
+          occurredAt: new Date(dto.occurredAt),
         },
         include: this.transactionInclude,
       })
@@ -66,14 +66,13 @@ export class TransactionsService {
       ...(query.currency ? { currency: normalizeCurrency(query.currency) } : {}),
       ...(query.type ? { type: query.type } : {}),
       ...(query.method ? { method: query.method } : {}),
-      ...(query.occurredFrom || query.occurredTo
-        ? {
-            occurredAt: {
-              ...(query.occurredFrom ? { gte: query.occurredFrom } : {}),
-              ...(query.occurredTo ? { lte: query.occurredTo } : {}),
-            },
-          }
-        : {}),
+    }
+
+    if (query.occurredFrom || query.occurredTo) {
+      where.occurredAt = {
+        ...(query.occurredFrom ? { gte: new Date(query.occurredFrom) } : {}),
+        ...(query.occurredTo ? { lte: new Date(query.occurredTo) } : {}),
+      }
     }
 
     const [data, total] = await this.database.$transaction([

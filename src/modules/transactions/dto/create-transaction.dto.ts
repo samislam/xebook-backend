@@ -18,7 +18,7 @@ export const createTransactionSchema = z.object({
   currency: z.string().trim().min(1),
   referenceCode: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   note: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
-  occurredAt: z.coerce.date(),
+  occurredAt: z.string(),
 })
 
 export class CreateTransactionDto extends createZodDto(createTransactionSchema) {}

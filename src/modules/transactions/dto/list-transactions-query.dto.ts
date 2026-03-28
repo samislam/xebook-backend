@@ -17,8 +17,8 @@ export const listTransactionsQuerySchema = paginationQuerySchema.extend({
   currency: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   type: z.preprocess(emptyToUndefined, z.enum(TransactionType).optional()),
   method: z.preprocess(emptyToUndefined, z.enum(TransferMethod).optional()),
-  occurredFrom: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
-  occurredTo: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
+  occurredFrom: z.preprocess(emptyToUndefined, z.string().optional()),
+  occurredTo: z.preprocess(emptyToUndefined, z.string().optional()),
 })
 
 export class ListTransactionsQueryDto extends createZodDto(listTransactionsQuerySchema) {}
