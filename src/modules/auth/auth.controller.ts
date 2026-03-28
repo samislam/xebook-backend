@@ -1,10 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common'
-import { AuthService } from '@/auth/auth.service'
 import { LoginDto } from '@/auth/dto/login.dto'
-import { RegisterDto } from '@/auth/dto/register.dto'
+import { AuthService } from '@/auth/auth.service'
 import { JwtUser } from '@/auth/types/jwt-user.type'
-import { CurrentUser } from '@/common/decorators/current-user.decorator'
+import { RegisterDto } from '@/auth/dto/register.dto'
+import { Body, Controller, Get, Post } from '@nestjs/common'
 import { Public } from '@/common/decorators/public.decorator'
+import { CurrentUser } from '@/common/decorators/current-user.decorator'
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {

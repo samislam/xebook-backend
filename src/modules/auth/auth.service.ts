@@ -1,10 +1,12 @@
 import { compare, hash } from 'bcryptjs'
-import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import { Injectable } from '@nestjs/common'
 import { LoginDto } from '@/auth/dto/login.dto'
-import { RegisterDto } from '@/auth/dto/register.dto'
 import { JwtUser } from '@/auth/types/jwt-user.type'
 import { UsersService } from '@/users/users.service'
+import { RegisterDto } from '@/auth/dto/register.dto'
+import { AccountForzenHttpException } from '@/classes/auth-exception.class'
+import { InvalidCredentialsHttpException } from '@/classes/auth-exception.class'
 
 @Injectable()
 export class AuthService {
@@ -30,27 +32,22 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.usersService.findByUsername(dto.username)
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Invalid credentials')
-    }
-
+    if (!user) throw new InvalidCredentialsHttpException()
+    if (!user.isActive) throw new AccountForzenHttpException()
     const isValid = await compare(dto.password, user.passwordHash)
-    if (!isValid) {
-      throw new UnauthorizedException('Invalid credentials')
-    }
-
+    if (!isValid) throw new InvalidCredentialsHttpException()
     return this.buildAuthResponse({
       sub: user.id,
-      username: user.username,
       name: user.name,
+      username: user.username,
     })
   }
 
   private async buildAuthResponse(user: JwtUser) {
     const accessToken = await this.jwtService.signAsync(user)
     return {
-      accessToken,
       user,
+      accessToken,
     }
   }
 }
