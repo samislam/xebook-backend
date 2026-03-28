@@ -1,22 +1,303 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-    provider      = "prisma-client-js"
-    output        = "../generated/prisma"
-    binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Example {
-    id    String  @id @default(uuid())
-    email String  @unique
-    name  String?
+enum InstitutionType {
+  BANK
+  WALLET
+  EXCHANGE
+  CASH_OFFICE
+  PAYMENT_APP
+  OTHER
+}
+
+enum CounterpartyType {
+  PERSON
+  BUSINESS
+  MERCHANT
+  TRADER
+  COMPANY
+  UNKNOWN
+}
+
+enum TransferMethod {
+  CASH
+  BANK
+  WALLET
+  MANUAL
+  MIXED
+  OTHER
+}
+
+enum TransactionType {
+  OPENING_BALANCE
+  CASH_TO_USER_HOLD
+  ACCOUNT_TO_USER_HOLD
+  USER_RETURNS_FUNDS
+  INTERNAL_HOLDER_TRANSFER
+  INTERNAL_ACCOUNT_TRANSFER
+  COUNTERPARTY_IN
+  COUNTERPARTY_OUT
+  CREATE_DEBT
+  SETTLE_DEBT_DIRECT
+  SETTLE_DEBT_VIA_COUNTERPARTY
+  EXPENSE
+  ADJUSTMENT
+}
+
+enum OrderStatus {
+  OPEN
+  PENDING_PAYMENT
+  PARTIALLY_SETTLED
+  SETTLED
+  CANCELLED
+}
+
+enum SettlementKind {
+  PAYMENT
+  RETURN
+  FEE
+  ADJUSTMENT
+}
+
+enum SettlementStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  username     String   @unique
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  accounts InstitutionAccount[]
+
+  ownedHeldBalances   HeldBalance[] @relation("HeldBalanceOwner")
+  holdingHeldBalances HeldBalance[] @relation("HeldBalanceHolder")
+
+  debtsAsDebtor   DebtBalance[] @relation("DebtBalanceDebtor")
+  debtsAsCreditor DebtBalance[] @relation("DebtBalanceCreditor")
+
+  ownedTransactions       Transaction[] @relation("TransactionOwner")
+  initiatedTransactions   Transaction[] @relation("TransactionInitiator")
+  fromUserTransactions    Transaction[] @relation("TransactionFromUser")
+  toUserTransactions      Transaction[] @relation("TransactionToUser")
+  beneficiaryTransactions Transaction[] @relation("TransactionBeneficiary")
+
+  buyOrders  Order[] @relation("OrderBuyer")
+  sellOrders Order[] @relation("OrderSeller")
+
+  orderSettlementPayerRows       OrderSettlement[] @relation("OrderSettlementPayer")
+  orderSettlementPayeeRows       OrderSettlement[] @relation("OrderSettlementPayee")
+  orderSettlementBeneficiaryRows OrderSettlement[] @relation("OrderSettlementBeneficiary")
+}
+
+model Counterparty {
+  id        String           @id @default(cuid())
+  name      String
+  type      CounterpartyType @default(UNKNOWN)
+  phone     String?
+  note      String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  incomingTransactions Transaction[] @relation("TransactionFromCounterparty")
+  outgoingTransactions Transaction[] @relation("TransactionToCounterparty")
+
+  orderSettlementRows OrderSettlement[] @relation("OrderSettlementToCounterparty")
+
+  @@index([name])
+}
+
+model Institution {
+  id        String          @id @default(cuid())
+  name      String
+  country   String?
+  type      InstitutionType @default(OTHER)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  accounts InstitutionAccount[]
+
+  @@unique([name, country])
+}
+
+model InstitutionAccount {
+  id                String   @id @default(cuid())
+  userId            String
+  institutionId     String
+  currency          String   @db.VarChar(10)
+  title             String
+  accountIdentifier String?
+  isActive          Boolean  @default(true)
+  note              String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  institution Institution @relation(fields: [institutionId], references: [id], onDelete: Restrict)
+
+  outgoingTransactions Transaction[] @relation("TransactionFromAccount")
+  incomingTransactions Transaction[] @relation("TransactionToAccount")
+
+  orderSettlementToRows   OrderSettlement[] @relation("OrderSettlementToAccount")
+  orderSettlementFromRows OrderSettlement[] @relation("OrderSettlementFromAccount")
+
+  @@index([userId])
+  @@index([institutionId])
+  @@index([userId, currency])
+  @@unique([userId, institutionId, currency, title])
+}
+
+model HeldBalance {
+  id           String   @id @default(cuid())
+  ownerUserId  String
+  holderUserId String
+  currency     String   @db.VarChar(10)
+  amount       Decimal  @default(0) @db.Decimal(20, 8)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  ownerUser  User @relation("HeldBalanceOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  holderUser User @relation("HeldBalanceHolder", fields: [holderUserId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerUserId, holderUserId, currency])
+  @@index([ownerUserId])
+  @@index([holderUserId])
+  @@index([currency])
+}
+
+model DebtBalance {
+  id             String   @id @default(cuid())
+  debtorUserId   String
+  creditorUserId String
+  currency       String   @db.VarChar(10)
+  amount         Decimal  @default(0) @db.Decimal(20, 8)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  debtorUser   User @relation("DebtBalanceDebtor", fields: [debtorUserId], references: [id], onDelete: Cascade)
+  creditorUser User @relation("DebtBalanceCreditor", fields: [creditorUserId], references: [id], onDelete: Cascade)
+
+  @@unique([debtorUserId, creditorUserId, currency])
+  @@index([debtorUserId])
+  @@index([creditorUserId])
+  @@index([currency])
+}
+
+model Transaction {
+  id                String          @id @default(cuid())
+  type              TransactionType
+  method            TransferMethod  @default(BANK)
+  ownerUserId       String
+  initiatorUserId   String
+  fromUserId        String?
+  toUserId          String?
+  beneficiaryUserId String?
+  fromAccountId     String?
+  toAccountId       String?
+  fromCounterpartyId String?
+  toCounterpartyId   String?
+  amount            Decimal         @db.Decimal(20, 8)
+  currency          String          @db.VarChar(10)
+  referenceCode     String?
+  note              String?
+  occurredAt        DateTime
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  ownerUser        User               @relation("TransactionOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  initiatorUser    User               @relation("TransactionInitiator", fields: [initiatorUserId], references: [id], onDelete: Restrict)
+  fromUser         User?              @relation("TransactionFromUser", fields: [fromUserId], references: [id], onDelete: Restrict)
+  toUser           User?              @relation("TransactionToUser", fields: [toUserId], references: [id], onDelete: Restrict)
+  beneficiaryUser  User?              @relation("TransactionBeneficiary", fields: [beneficiaryUserId], references: [id], onDelete: Restrict)
+  fromAccount      InstitutionAccount? @relation("TransactionFromAccount", fields: [fromAccountId], references: [id], onDelete: SetNull)
+  toAccount        InstitutionAccount? @relation("TransactionToAccount", fields: [toAccountId], references: [id], onDelete: SetNull)
+  fromCounterparty Counterparty?      @relation("TransactionFromCounterparty", fields: [fromCounterpartyId], references: [id], onDelete: SetNull)
+  toCounterparty   Counterparty?      @relation("TransactionToCounterparty", fields: [toCounterpartyId], references: [id], onDelete: SetNull)
+
+  @@index([ownerUserId, occurredAt])
+  @@index([initiatorUserId, occurredAt])
+  @@index([fromUserId, occurredAt])
+  @@index([toUserId, occurredAt])
+  @@index([beneficiaryUserId, occurredAt])
+  @@index([fromAccountId, occurredAt])
+  @@index([toAccountId, occurredAt])
+  @@index([fromCounterpartyId, occurredAt])
+  @@index([toCounterpartyId, occurredAt])
+  @@index([currency, occurredAt])
+  @@index([type, occurredAt])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  buyerUserId   String
+  sellerUserId  String
+  baseCurrency  String      @db.VarChar(10)
+  baseAmount    Decimal     @db.Decimal(20, 8)
+  quoteCurrency String      @db.VarChar(10)
+  quoteAmount   Decimal     @db.Decimal(20, 8)
+  status        OrderStatus @default(PENDING_PAYMENT)
+  impliedRate   Decimal?    @db.Decimal(20, 8)
+  note          String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  buyerUser   User              @relation("OrderBuyer", fields: [buyerUserId], references: [id], onDelete: Restrict)
+  sellerUser  User              @relation("OrderSeller", fields: [sellerUserId], references: [id], onDelete: Restrict)
+  settlements OrderSettlement[]
+
+  @@index([buyerUserId, createdAt])
+  @@index([sellerUserId, createdAt])
+  @@index([status, createdAt])
+}
+
+model OrderSettlement {
+  id                String           @id @default(cuid())
+  orderId           String
+  kind              SettlementKind
+  status            SettlementStatus @default(PENDING)
+  payerUserId       String?
+  payeeUserId       String?
+  beneficiaryUserId String?
+  toCounterpartyId  String?
+  toAccountId       String?
+  fromAccountId     String?
+  method            TransferMethod   @default(BANK)
+  currency          String           @db.VarChar(10)
+  amount            Decimal          @db.Decimal(20, 8)
+  note              String?
+  dueAt             DateTime?
+  paidAt            DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  order           Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payerUser       User?              @relation("OrderSettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
+  payeeUser       User?              @relation("OrderSettlementPayee", fields: [payeeUserId], references: [id], onDelete: Restrict)
+  beneficiaryUser User?              @relation("OrderSettlementBeneficiary", fields: [beneficiaryUserId], references: [id], onDelete: Restrict)
+  toCounterparty  Counterparty?      @relation("OrderSettlementToCounterparty", fields: [toCounterpartyId], references: [id], onDelete: SetNull)
+  toAccount       InstitutionAccount? @relation("OrderSettlementToAccount", fields: [toAccountId], references: [id], onDelete: SetNull)
+  fromAccount     InstitutionAccount? @relation("OrderSettlementFromAccount", fields: [fromAccountId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, status])
+  @@index([payerUserId, createdAt])
+  @@index([payeeUserId, createdAt])
+  @@index([beneficiaryUserId, createdAt])
+  @@index([toCounterpartyId, createdAt])
+  @@index([toAccountId, createdAt])
+  @@index([fromAccountId, createdAt])
+  @@index([currency, createdAt])
 }

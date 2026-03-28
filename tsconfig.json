@@ -1,9 +1,23 @@
 {
-  "compilerOptions": { 
+  "compilerOptions": {
     "rootDir": "./",
     "types": ["jest", "node"],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/auth/*": ["./src/modules/auth/*"],
+      "@/balances/*": ["./src/modules/balances/*"],
+      "@/counterparties/*": ["./src/modules/counterparties/*"],
+      "@/debt-balances/*": ["./src/modules/debt-balances/*"],
+      "@/held-balances/*": ["./src/modules/held-balances/*"],
+      "@/institution-accounts/*": ["./src/modules/institution-accounts/*"],
+      "@/institutions/*": ["./src/modules/institutions/*"],
+      "@/order-settlements/*": ["./src/modules/order-settlements/*"],
+      "@/orders/*": ["./src/modules/orders/*"],
+      "@/transactions/*": ["./src/modules/transactions/*"],
+      "@/users/*": ["./src/modules/users/*"],
+      "@/common/dto/*": ["./src/common/dtos/*"],
+      "@/common/dtos/*": ["./src/common/dtos/*"]
     },
     "strict": true,
     "sourceMap": true,
@@ -13,12 +27,10 @@
     "module": "commonjs",
     "noImplicitAny": true,
     "removeComments": true,
-    "noUnusedLocals": false,
     "esModuleInterop": true,
     "strictNullChecks": true,
     "resolveJsonModule": true,
     "moduleDetection": "force",
-    "noUnusedParameters": false,
     "strictBindCallApply": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
@@ -26,7 +38,7 @@
     "allowSyntheticDefaultImports": true,
     "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
-    "noPropertyAccessFromIndexSignature": false 
+    "noPropertyAccessFromIndexSignature": false
   },
   "include": ["./src/**/*.ts", "./tests/**/*.ts", "./scripts/**/*.ts"]
 }
