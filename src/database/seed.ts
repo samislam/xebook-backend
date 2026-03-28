@@ -1,28 +1,11 @@
-import { hash } from 'bcryptjs'
 import { PrismaClient } from '@/generated/prisma'
 import { runSeeders } from '@/lib/prisma/run-seeders'
+import { rootAccountSeeder } from '@/database/seeders/root-account.seeder'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  await runSeeders(prisma, [
-    async (tx) => {
-      const passwordHash = await hash('ChangeMe123!', 12)
-      await tx.user.upsert({
-        where: { username: 'admin' },
-        update: {
-          name: 'Admin',
-          isActive: true,
-        },
-        create: {
-          name: 'Admin',
-          username: 'admin',
-          passwordHash,
-          isActive: true,
-        },
-      })
-    },
-  ])
+  await runSeeders(prisma, [rootAccountSeeder])
 }
 
 main()
