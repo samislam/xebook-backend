@@ -2,9 +2,9 @@ import { LoginDto } from '@/auth/dto/login.dto'
 import { AuthService } from '@/auth/auth.service'
 import { JwtUser } from '@/auth/types/jwt-user.type'
 import { RegisterDto } from '@/auth/dto/register.dto'
-import { Body, Controller, Get, Post } from '@nestjs/common'
 import { Public } from '@/common/decorators/public.decorator'
 import { CurrentUser } from '@/common/decorators/current-user.decorator'
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common'
 
 @Controller({ path: 'auth', version: '1' })
 export class AuthController {
@@ -18,6 +18,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto)
   }
