@@ -23,7 +23,7 @@ export class AuthController {
     return this.authService.login(dto)
   }
 
-  @Get('me')
+  @Get(['me', 'whoami'])
   me(@CurrentUser() user: JwtUser) {
     return { user }
   }
