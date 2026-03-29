@@ -48,7 +48,11 @@ export class OrderSettlementsService {
           amount,
           note: dto.note,
           dueAt: dto.dueAt ? new Date(dto.dueAt) : undefined,
-          paidAt: dto.paidAt ? new Date(dto.paidAt) : status === SettlementStatus.PAID ? new Date() : undefined,
+          paidAt: dto.paidAt
+            ? new Date(dto.paidAt)
+            : status === SettlementStatus.PAID
+              ? new Date()
+              : undefined,
         },
         include: this.settlementInclude,
       })
