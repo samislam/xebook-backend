@@ -1,12 +1,13 @@
 import { hash } from 'bcryptjs'
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { Prisma } from '@/generated/prisma'
-import { DatabaseService } from '@/database/database.service'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
-import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { SafeUser } from './user-types'
+import { Prisma, User } from '@/generated/prisma'
 import { CreateUserDto } from '@/users/dto/create-user.dto'
-import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
 import { UpdateUserDto } from '@/users/dto/update-user.dto'
+import { DatabaseService } from '@/database/database.service'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
+import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
 @Injectable()
 export class UsersService {
@@ -90,9 +91,12 @@ export class UsersService {
     })
   }
 
-  findByUsername(username: string) {
+  findByUsername(username: string, withPasswordHash: true): Promise<User | null>
+  findByUsername(username: string, withPasswordHash?: false): Promise<SafeUser | null>
+  findByUsername(username: string, withPasswordHash = false) {
     return this.database.user.findUnique({
       where: { username: username.toLowerCase() },
+      omit: { passwordHash: !withPasswordHash },
     })
   }
 
