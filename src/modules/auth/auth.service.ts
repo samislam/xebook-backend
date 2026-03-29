@@ -1,10 +1,14 @@
+import Catch from 'catch-decorator'
 import { compare, hash } from 'bcryptjs'
 import { JwtService } from '@nestjs/jwt'
+import { Prisma } from '@/generated/prisma'
 import { Injectable } from '@nestjs/common'
 import { LoginDto } from '@/auth/dto/login.dto'
+import { PRISMA_DUPLICATE_ERR } from '@/constants'
 import { UsersService } from '@/users/users.service'
 import { RegisterDto } from '@/auth/dto/register.dto'
 import { AccountForzenHttpException } from '@/classes/auth-exception.class'
+import { DuplicateHttpException } from '@/classes/duplicate-exception.class'
 import { InvalidCredentialsHttpException } from '@/classes/auth-exception.class'
 
 @Injectable()
@@ -14,6 +18,7 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
+  @Catch(Error, (error: Error, ctx: AuthService) => ctx.errorClassifier(error))
   async register(dto: RegisterDto) {
     const passwordHash = await hash(dto.password, 12)
     const user = await this.usersService.create({
@@ -51,5 +56,19 @@ export class AuthService {
       user: safeUser,
       accessToken,
     }
+  }
+
+  private errorClassifier(error: Error): never {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (error.code) {
+        case PRISMA_DUPLICATE_ERR:
+          throw new DuplicateHttpException(['username'], 'Username already exists')
+
+        default:
+          throw error
+      }
+    }
+
+    throw error
   }
 }

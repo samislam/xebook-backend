@@ -6,6 +6,8 @@ import { UpdateUserDto } from '@/users/dto/update-user.dto'
 import { DatabaseService } from '@/database/database.service'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
+import { usersResourceConfig } from '@/users/users.config'
+import { buildPrismaSelect } from '@/lib/prisma/build-prisma-select'
 import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
@@ -14,6 +16,8 @@ export class UsersService {
   constructor(private readonly database: DatabaseService) {}
 
   async create(dto: CreateUserDto) {
+    const selectedFields = usersResourceConfig.getSelectArgs({})
+
     return this.database.user.create({
       data: {
         name: dto.name,
@@ -21,22 +25,18 @@ export class UsersService {
         passwordHash: dto.passwordHash,
         isActive: dto.isActive ?? true,
       },
-      select: this.userSelect,
+      select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
     })
   }
 
   async list(query: ListUsersQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const { sortBy, sortOrder, search, select } = query
+    const selectedFields = usersResourceConfig.getSelectArgs({ select })
+    const sortArgs = usersResourceConfig.getSortArgs({ sortBy, sortOrder })
     const where: Prisma.UserWhereInput = {
-      ...(query.search
-        ? {
-            OR: [
-              { name: { contains: query.search, mode: 'insensitive' } },
-              { username: { contains: query.search.toLowerCase(), mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-      ...(query.isActive !== undefined ? { isActive: query.isActive } : {}),
+      ...usersResourceConfig.search(search),
+      isActive: query.isActive,
     }
 
     const [data, total] = await this.database.$transaction([
@@ -47,16 +47,8 @@ export class UsersService {
         orderBy: buildPrismaOrderBy<
           Prisma.UserScalarFieldEnum,
           Prisma.UserOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy && ['name', 'username', 'createdAt', 'updatedAt'].includes(query.sortBy)
-              ? (query.sortBy as Prisma.UserScalarFieldEnum)
-              : 'createdAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
-        select: this.userSelect,
+        >(sortArgs),
+        select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
       }),
       this.database.user.count({ where }),
     ])
@@ -65,20 +57,18 @@ export class UsersService {
   }
 
   async findOne(id: string) {
+    const selectedFields = usersResourceConfig.getSelectArgs({})
     const user = await this.database.user.findUnique({
       where: { id },
-      select: this.userSelect,
+      select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
     })
-
-    if (!user) {
-      throw new NotFoundException('User not found')
-    }
-
+    if (!user) throw new NotFoundException('User not found')
     return user
   }
 
   async update(id: string, dto: UpdateUserDto) {
     await this.ensureExists(id)
+    const selectedFields = usersResourceConfig.getSelectArgs({})
 
     return this.database.user.update({
       where: { id },
@@ -87,7 +77,7 @@ export class UsersService {
         ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
         ...(dto.password ? { passwordHash: await hash(dto.password, 12) } : {}),
       },
-      select: this.userSelect,
+      select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
     })
   }
 
@@ -116,13 +106,4 @@ export class UsersService {
       throw new NotFoundException('User not found')
     }
   }
-
-  private readonly userSelect = {
-    id: true,
-    name: true,
-    username: true,
-    isActive: true,
-    createdAt: true,
-    updatedAt: true,
-  } satisfies Prisma.UserSelect
 }
