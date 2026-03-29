@@ -1,11 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@/generated/prisma'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
-import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { DatabaseService } from '@/database/database.service'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { buildPrismaSelect } from '@/lib/prisma/build-prisma-select'
+import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { CreateCounterpartyDto } from '@/counterparties/dto/create-counterparty.dto'
-import { ListCounterpartiesQueryDto } from '@/counterparties/dto/list-counterparties-query.dto'
 import { UpdateCounterpartyDto } from '@/counterparties/dto/update-counterparty.dto'
+import { counterpartiesResourceConfig } from '@/counterparties/counterparties.config'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
+import { ListCounterpartiesQueryDto } from '@/counterparties/dto/list-counterparties-query.dto'
 
 @Injectable()
 export class CounterpartiesService {
@@ -19,9 +21,14 @@ export class CounterpartiesService {
 
   async list(query: ListCounterpartiesQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const selectedFields = counterpartiesResourceConfig.getSelectArgs({ select: query.select })
+    const sortArgs = counterpartiesResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.CounterpartyWhereInput = {
-      ...(query.search ? { name: { contains: query.search, mode: 'insensitive' } } : {}),
-      ...(query.type ? { type: query.type } : {}),
+      ...counterpartiesResourceConfig.search(query.search),
+      type: query.type,
     }
 
     const [data, total] = await this.database.$transaction([
@@ -29,18 +36,13 @@ export class CounterpartiesService {
         where,
         skip,
         take,
+        select: buildPrismaSelect<Prisma.CounterpartyScalarFieldEnum, Prisma.CounterpartySelect>(
+          selectedFields
+        ),
         orderBy: buildPrismaOrderBy<
           Prisma.CounterpartyScalarFieldEnum,
           Prisma.CounterpartyOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy && ['name', 'type', 'createdAt', 'updatedAt'].includes(query.sortBy)
-              ? (query.sortBy as Prisma.CounterpartyScalarFieldEnum)
-              : 'createdAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
       }),
       this.database.counterparty.count({ where }),
     ])

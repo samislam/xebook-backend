@@ -1,14 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { Prisma, OrderStatus, SettlementStatus } from '@/generated/prisma'
-import { BalancesService } from '@/balances/balances.service'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
-import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
-import { assertDecimalPositive, toDecimal } from '@/common/utils/decimal'
 import { normalizeCurrency } from '@/common/utils/currency'
+import { BalancesService } from '@/balances/balances.service'
+import { ordersResourceConfig } from '@/orders/orders.config'
 import { DatabaseService } from '@/database/database.service'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { CreateOrderDto } from '@/orders/dto/create-order.dto'
-import { ListOrdersQueryDto } from '@/orders/dto/list-orders-query.dto'
 import { UpdateOrderDto } from '@/orders/dto/update-order.dto'
+import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { ListOrdersQueryDto } from '@/orders/dto/list-orders-query.dto'
+import { assertDecimalPositive, toDecimal } from '@/common/utils/decimal'
+import { Prisma, OrderStatus, SettlementStatus } from '@/generated/prisma'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
 @Injectable()
 export class OrdersService {
@@ -55,10 +56,14 @@ export class OrdersService {
 
   async list(query: ListOrdersQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const sortArgs = ordersResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.OrderWhereInput = {
-      ...(query.buyerUserId ? { buyerUserId: query.buyerUserId } : {}),
-      ...(query.sellerUserId ? { sellerUserId: query.sellerUserId } : {}),
-      ...(query.status ? { status: query.status } : {}),
+      buyerUserId: query.buyerUserId,
+      sellerUserId: query.sellerUserId,
+      status: query.status,
       ...(query.currency
         ? {
             OR: [
@@ -77,24 +82,7 @@ export class OrdersService {
         orderBy: buildPrismaOrderBy<
           Prisma.OrderScalarFieldEnum,
           Prisma.OrderOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy &&
-            [
-              'buyerUserId',
-              'sellerUserId',
-              'baseCurrency',
-              'quoteCurrency',
-              'status',
-              'createdAt',
-              'updatedAt',
-            ].includes(query.sortBy)
-              ? (query.sortBy as Prisma.OrderScalarFieldEnum)
-              : 'createdAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
         include: this.orderInclude,
       }),
       this.database.order.count({ where }),

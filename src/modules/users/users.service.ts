@@ -1,12 +1,12 @@
 import { hash } from 'bcryptjs'
 import { SafeUser } from './user-types'
 import { Prisma, User } from '@/generated/prisma'
+import { usersResourceConfig } from '@/users/users.config'
 import { CreateUserDto } from '@/users/dto/create-user.dto'
 import { UpdateUserDto } from '@/users/dto/update-user.dto'
 import { DatabaseService } from '@/database/database.service'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
-import { usersResourceConfig } from '@/users/users.config'
 import { buildPrismaSelect } from '@/lib/prisma/build-prisma-select'
 import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
@@ -39,7 +39,8 @@ export class UsersService {
       isActive: query.isActive,
     }
 
-    const [data, total] = await this.database.$transaction([
+    const [total, data] = await this.database.$transaction([
+      this.database.user.count({ where }),
       this.database.user.findMany({
         where,
         skip,
@@ -50,7 +51,6 @@ export class UsersService {
         >(sortArgs),
         select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
       }),
-      this.database.user.count({ where }),
     ])
 
     return buildPaginatedResponse({ data, total, page, perPage })

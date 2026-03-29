@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { Prisma } from '@/generated/prisma'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
-import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { normalizeCurrency } from '@/common/utils/currency'
 import { DatabaseService } from '@/database/database.service'
+import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { debtBalancesResourceConfig } from '@/debt-balances/debt-balances.config'
 import { ListDebtBalancesQueryDto } from '@/debt-balances/dto/list-debt-balances-query.dto'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
 @Injectable()
 export class DebtBalancesService {
@@ -12,10 +13,14 @@ export class DebtBalancesService {
 
   async list(query: ListDebtBalancesQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const sortArgs = debtBalancesResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.DebtBalanceWhereInput = {
-      ...(query.debtorUserId ? { debtorUserId: query.debtorUserId } : {}),
-      ...(query.creditorUserId ? { creditorUserId: query.creditorUserId } : {}),
-      ...(query.currency ? { currency: normalizeCurrency(query.currency) } : {}),
+      debtorUserId: query.debtorUserId,
+      creditorUserId: query.creditorUserId,
+      currency: query.currency ? normalizeCurrency(query.currency) : undefined,
     }
 
     const [data, total] = await this.database.$transaction([
@@ -26,23 +31,7 @@ export class DebtBalancesService {
         orderBy: buildPrismaOrderBy<
           Prisma.DebtBalanceScalarFieldEnum,
           Prisma.DebtBalanceOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy &&
-            [
-              'debtorUserId',
-              'creditorUserId',
-              'currency',
-              'amount',
-              'createdAt',
-              'updatedAt',
-            ].includes(query.sortBy)
-              ? (query.sortBy as Prisma.DebtBalanceScalarFieldEnum)
-              : 'updatedAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
         include: this.balanceInclude,
       }),
       this.database.debtBalance.count({ where }),

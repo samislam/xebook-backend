@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@/generated/prisma'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
-import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { normalizeCurrency } from '@/common/utils/currency'
 import { DatabaseService } from '@/database/database.service'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
+import { institutionAccountsResourceConfig } from '@/institution-accounts/institution-accounts.config'
 import { CreateInstitutionAccountDto } from '@/institution-accounts/dto/create-institution-account.dto'
-import { ListInstitutionAccountsQueryDto } from '@/institution-accounts/dto/list-institution-accounts-query.dto'
 import { UpdateInstitutionAccountDto } from '@/institution-accounts/dto/update-institution-account.dto'
+import { ListInstitutionAccountsQueryDto } from '@/institution-accounts/dto/list-institution-accounts-query.dto'
 
 @Injectable()
 export class InstitutionAccountsService {
@@ -25,11 +26,15 @@ export class InstitutionAccountsService {
 
   async list(query: ListInstitutionAccountsQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const sortArgs = institutionAccountsResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.InstitutionAccountWhereInput = {
-      ...(query.userId ? { userId: query.userId } : {}),
-      ...(query.institutionId ? { institutionId: query.institutionId } : {}),
-      ...(query.currency ? { currency: normalizeCurrency(query.currency) } : {}),
-      ...(query.isActive !== undefined ? { isActive: query.isActive } : {}),
+      userId: query.userId,
+      institutionId: query.institutionId,
+      currency: query.currency ? normalizeCurrency(query.currency) : undefined,
+      isActive: query.isActive,
     }
 
     const [data, total] = await this.database.$transaction([
@@ -40,15 +45,7 @@ export class InstitutionAccountsService {
         orderBy: buildPrismaOrderBy<
           Prisma.InstitutionAccountScalarFieldEnum,
           Prisma.InstitutionAccountOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy && ['title', 'currency', 'createdAt', 'updatedAt'].includes(query.sortBy)
-              ? (query.sortBy as Prisma.InstitutionAccountScalarFieldEnum)
-              : 'createdAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
         include: this.accountInclude,
       }),
       this.database.institutionAccount.count({ where }),

@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { Prisma } from '@/generated/prisma'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
-import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { normalizeCurrency } from '@/common/utils/currency'
 import { DatabaseService } from '@/database/database.service'
+import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { heldBalancesResourceConfig } from '@/held-balances/held-balances.config'
 import { ListHeldBalancesQueryDto } from '@/held-balances/dto/list-held-balances-query.dto'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
 @Injectable()
 export class HeldBalancesService {
@@ -12,10 +13,14 @@ export class HeldBalancesService {
 
   async list(query: ListHeldBalancesQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const sortArgs = heldBalancesResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.HeldBalanceWhereInput = {
-      ...(query.ownerUserId ? { ownerUserId: query.ownerUserId } : {}),
-      ...(query.holderUserId ? { holderUserId: query.holderUserId } : {}),
-      ...(query.currency ? { currency: normalizeCurrency(query.currency) } : {}),
+      ownerUserId: query.ownerUserId,
+      holderUserId: query.holderUserId,
+      currency: query.currency ? normalizeCurrency(query.currency) : undefined,
     }
 
     const [data, total] = await this.database.$transaction([
@@ -26,23 +31,7 @@ export class HeldBalancesService {
         orderBy: buildPrismaOrderBy<
           Prisma.HeldBalanceScalarFieldEnum,
           Prisma.HeldBalanceOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy &&
-            [
-              'ownerUserId',
-              'holderUserId',
-              'currency',
-              'amount',
-              'createdAt',
-              'updatedAt',
-            ].includes(query.sortBy)
-              ? (query.sortBy as Prisma.HeldBalanceScalarFieldEnum)
-              : 'updatedAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
         include: this.balanceInclude,
       }),
       this.database.heldBalance.count({ where }),

@@ -1,13 +1,14 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
-import { Prisma, Transaction as TransactionModel, TransactionType } from '@/generated/prisma'
+import { normalizeCurrency } from '@/common/utils/currency'
 import { BalancesService } from '@/balances/balances.service'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
+import { DatabaseService } from '@/database/database.service'
 import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { assertDecimalPositive, toDecimal } from '@/common/utils/decimal'
-import { normalizeCurrency } from '@/common/utils/currency'
-import { DatabaseService } from '@/database/database.service'
+import { transactionsResourceConfig } from '@/transactions/transactions.config'
 import { CreateTransactionDto } from '@/transactions/dto/create-transaction.dto'
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common'
 import { ListTransactionsQueryDto } from '@/transactions/dto/list-transactions-query.dto'
+import { Prisma, Transaction as TransactionModel, TransactionType } from '@/generated/prisma'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
 @Injectable()
 export class TransactionsService {
@@ -53,19 +54,23 @@ export class TransactionsService {
 
   async list(query: ListTransactionsQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const sortArgs = transactionsResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.TransactionWhereInput = {
-      ...(query.ownerUserId ? { ownerUserId: query.ownerUserId } : {}),
-      ...(query.initiatorUserId ? { initiatorUserId: query.initiatorUserId } : {}),
-      ...(query.fromUserId ? { fromUserId: query.fromUserId } : {}),
-      ...(query.toUserId ? { toUserId: query.toUserId } : {}),
-      ...(query.beneficiaryUserId ? { beneficiaryUserId: query.beneficiaryUserId } : {}),
-      ...(query.fromAccountId ? { fromAccountId: query.fromAccountId } : {}),
-      ...(query.toAccountId ? { toAccountId: query.toAccountId } : {}),
-      ...(query.fromCounterpartyId ? { fromCounterpartyId: query.fromCounterpartyId } : {}),
-      ...(query.toCounterpartyId ? { toCounterpartyId: query.toCounterpartyId } : {}),
-      ...(query.currency ? { currency: normalizeCurrency(query.currency) } : {}),
-      ...(query.type ? { type: query.type } : {}),
-      ...(query.method ? { method: query.method } : {}),
+      ownerUserId: query.ownerUserId,
+      initiatorUserId: query.initiatorUserId,
+      fromUserId: query.fromUserId,
+      toUserId: query.toUserId,
+      beneficiaryUserId: query.beneficiaryUserId,
+      fromAccountId: query.fromAccountId,
+      toAccountId: query.toAccountId,
+      fromCounterpartyId: query.fromCounterpartyId,
+      toCounterpartyId: query.toCounterpartyId,
+      currency: query.currency ? normalizeCurrency(query.currency) : undefined,
+      type: query.type,
+      method: query.method,
     }
 
     if (query.occurredFrom || query.occurredTo) {
@@ -83,26 +88,7 @@ export class TransactionsService {
         orderBy: buildPrismaOrderBy<
           Prisma.TransactionScalarFieldEnum,
           Prisma.TransactionOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy &&
-            [
-              'type',
-              'method',
-              'ownerUserId',
-              'initiatorUserId',
-              'currency',
-              'amount',
-              'occurredAt',
-              'createdAt',
-              'updatedAt',
-            ].includes(query.sortBy)
-              ? (query.sortBy as Prisma.TransactionScalarFieldEnum)
-              : 'occurredAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
         include: this.transactionInclude,
       }),
       this.database.transaction.count({ where }),

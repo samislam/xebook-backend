@@ -1,11 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
 import { Prisma } from '@/generated/prisma'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
-import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { DatabaseService } from '@/database/database.service'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { buildPrismaSelect } from '@/lib/prisma/build-prisma-select'
+import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { institutionsResourceConfig } from '@/institutions/institutions.config'
 import { CreateInstitutionDto } from '@/institutions/dto/create-institution.dto'
-import { ListInstitutionsQueryDto } from '@/institutions/dto/list-institutions-query.dto'
 import { UpdateInstitutionDto } from '@/institutions/dto/update-institution.dto'
+import { ListInstitutionsQueryDto } from '@/institutions/dto/list-institutions-query.dto'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
 @Injectable()
 export class InstitutionsService {
@@ -19,9 +21,14 @@ export class InstitutionsService {
 
   async list(query: ListInstitutionsQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const selectedFields = institutionsResourceConfig.getSelectArgs({ select: query.select })
+    const sortArgs = institutionsResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.InstitutionWhereInput = {
-      ...(query.search ? { name: { contains: query.search, mode: 'insensitive' } } : {}),
-      ...(query.type ? { type: query.type } : {}),
+      ...institutionsResourceConfig.search(query.search),
+      type: query.type,
     }
 
     const [data, total] = await this.database.$transaction([
@@ -29,19 +36,13 @@ export class InstitutionsService {
         where,
         skip,
         take,
+        select: buildPrismaSelect<Prisma.InstitutionScalarFieldEnum, Prisma.InstitutionSelect>(
+          selectedFields
+        ),
         orderBy: buildPrismaOrderBy<
           Prisma.InstitutionScalarFieldEnum,
           Prisma.InstitutionOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy &&
-            ['name', 'country', 'type', 'createdAt', 'updatedAt'].includes(query.sortBy)
-              ? (query.sortBy as Prisma.InstitutionScalarFieldEnum)
-              : 'createdAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
       }),
       this.database.institution.count({ where }),
     ])

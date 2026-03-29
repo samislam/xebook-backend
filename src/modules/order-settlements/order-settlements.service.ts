@@ -1,14 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
-import { Prisma, SettlementKind, SettlementStatus, TransactionType } from '@/generated/prisma'
+import { OrdersService } from '@/orders/orders.service'
+import { normalizeCurrency } from '@/common/utils/currency'
 import { BalancesService } from '@/balances/balances.service'
-import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
+import { DatabaseService } from '@/database/database.service'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
 import { assertDecimalPositive, toDecimal } from '@/common/utils/decimal'
-import { normalizeCurrency } from '@/common/utils/currency'
-import { DatabaseService } from '@/database/database.service'
+import { orderSettlementsResourceConfig } from '@/order-settlements/order-settlements.config'
+import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
+import { Prisma, SettlementKind, SettlementStatus, TransactionType } from '@/generated/prisma'
 import { CreateOrderSettlementDto } from '@/order-settlements/dto/create-order-settlement.dto'
 import { ListOrderSettlementsQueryDto } from '@/order-settlements/dto/list-order-settlements-query.dto'
-import { OrdersService } from '@/orders/orders.service'
 
 @Injectable()
 export class OrderSettlementsService {
@@ -129,15 +130,19 @@ export class OrderSettlementsService {
 
   async list(query: ListOrderSettlementsQueryDto) {
     const { page, perPage, skip, take } = getPaginationArgs(query)
+    const sortArgs = orderSettlementsResourceConfig.getSortArgs({
+      sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
+    })
     const where: Prisma.OrderSettlementWhereInput = {
-      ...(query.orderId ? { orderId: query.orderId } : {}),
-      ...(query.kind ? { kind: query.kind } : {}),
-      ...(query.status ? { status: query.status } : {}),
-      ...(query.payerUserId ? { payerUserId: query.payerUserId } : {}),
-      ...(query.payeeUserId ? { payeeUserId: query.payeeUserId } : {}),
-      ...(query.beneficiaryUserId ? { beneficiaryUserId: query.beneficiaryUserId } : {}),
-      ...(query.toCounterpartyId ? { toCounterpartyId: query.toCounterpartyId } : {}),
-      ...(query.currency ? { currency: normalizeCurrency(query.currency) } : {}),
+      orderId: query.orderId,
+      kind: query.kind,
+      status: query.status,
+      payerUserId: query.payerUserId,
+      payeeUserId: query.payeeUserId,
+      beneficiaryUserId: query.beneficiaryUserId,
+      toCounterpartyId: query.toCounterpartyId,
+      currency: query.currency ? normalizeCurrency(query.currency) : undefined,
     }
 
     const [data, total] = await this.database.$transaction([
@@ -148,26 +153,7 @@ export class OrderSettlementsService {
         orderBy: buildPrismaOrderBy<
           Prisma.OrderSettlementScalarFieldEnum,
           Prisma.OrderSettlementOrderByWithRelationInput
-        >({
-          sortBy:
-            query.sortBy &&
-            [
-              'orderId',
-              'kind',
-              'status',
-              'currency',
-              'amount',
-              'dueAt',
-              'paidAt',
-              'createdAt',
-              'updatedAt',
-            ].includes(query.sortBy)
-              ? (query.sortBy as Prisma.OrderSettlementScalarFieldEnum)
-              : 'createdAt',
-          sortOrder: query.sortOrder ?? 'desc',
-          tieBreakerField: 'id',
-          tieBreakerOrder: 'asc',
-        }),
+        >(sortArgs),
         include: this.settlementInclude,
       }),
       this.database.orderSettlement.count({ where }),
