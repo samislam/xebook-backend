@@ -1,10 +1,10 @@
 import { hash } from 'bcryptjs'
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
-import { IdParamDto } from '@/common/dto/id-param.dto'
-import { CreateUserRequestDto } from '@/users/dto/create-user-request.dto'
-import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
-import { UpdateUserDto } from '@/users/dto/update-user.dto'
 import { UsersService } from '@/users/users.service'
+import { IdParamDto } from '@/common/dto/id-param.dto'
+import { UpdateUserDto } from '@/users/dto/update-user.dto'
+import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
+import { CreateUserRequestDto } from '@/users/dto/create-user-request.dto'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
@@ -33,5 +33,10 @@ export class UsersController {
   @Patch(':id')
   update(@Param() params: IdParamDto, @Body() dto: UpdateUserDto) {
     return this.usersService.update(params.id, dto)
+  }
+
+  @Delete(':id')
+  remove(@Param() params: IdParamDto) {
+    return this.usersService.remove(params.id)
   }
 }

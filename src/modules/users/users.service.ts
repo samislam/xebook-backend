@@ -81,6 +81,16 @@ export class UsersService {
     })
   }
 
+  async remove(id: string) {
+    await this.ensureExists(id)
+    const selectedFields = usersResourceConfig.getSelectArgs({})
+
+    return this.database.user.delete({
+      where: { id },
+      select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
+    })
+  }
+
   findByUsername(username: string, withPasswordHash: true): Promise<User | null>
   findByUsername(username: string, withPasswordHash?: false): Promise<SafeUser | null>
   findByUsername(username: string, withPasswordHash = false) {
