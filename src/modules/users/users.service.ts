@@ -9,6 +9,7 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
 import { buildPrismaSelect } from '@/lib/prisma/build-prisma-select'
 import { buildPrismaOrderBy } from '@/lib/prisma/build-prisma-order-by'
+import { DuplicateHttpException } from '@/classes/duplicate-exception.class'
 import { buildPaginatedResponse, getPaginationArgs } from '@/common/utils/pagination-helpers'
 
 @Injectable()
@@ -73,12 +74,54 @@ export class UsersService {
     return this.database.user.update({
       where: { id },
       data: {
-        ...(dto.name !== undefined ? { name: dto.name } : {}),
-        ...(dto.isActive !== undefined ? { isActive: dto.isActive } : {}),
-        ...(dto.password ? { passwordHash: await hash(dto.password, 12) } : {}),
+        name: dto.name,
       },
       select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
     })
+  }
+
+  async changePassword(id: string, password: string) {
+    await this.ensureExists(id)
+    const selectedFields = usersResourceConfig.getSelectArgs({})
+
+    return this.database.user.update({
+      where: { id },
+      data: {
+        passwordHash: await hash(password, 12),
+      },
+      select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
+    })
+  }
+
+  async changeUsername(id: string, username: string) {
+    await this.ensureExists(id)
+    const normalizedUsername = username.toLowerCase()
+    const existingUser = await this.database.user.findUnique({
+      where: { username: normalizedUsername },
+      select: { id: true },
+    })
+
+    if (existingUser && existingUser.id !== id) {
+      throw new DuplicateHttpException(['username'], 'Username already exists')
+    }
+
+    const selectedFields = usersResourceConfig.getSelectArgs({})
+
+    return this.database.user.update({
+      where: { id },
+      data: {
+        username: normalizedUsername,
+      },
+      select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
+    })
+  }
+
+  async freeze(id: string) {
+    return this.updateActiveStatus(id, false)
+  }
+
+  async unfreeze(id: string) {
+    return this.updateActiveStatus(id, true)
   }
 
   async remove(id: string) {
@@ -115,5 +158,16 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('User not found')
     }
+  }
+
+  private async updateActiveStatus(id: string, isActive: boolean) {
+    await this.ensureExists(id)
+    const selectedFields = usersResourceConfig.getSelectArgs({})
+
+    return this.database.user.update({
+      where: { id },
+      data: { isActive },
+      select: buildPrismaSelect<Prisma.UserScalarFieldEnum, Prisma.UserSelect>(selectedFields),
+    })
   }
 }
