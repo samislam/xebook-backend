@@ -1,4 +1,4 @@
-export const emptyToUndefined = (value: unknown) => {
+export const omitEmptyField = (value: unknown) => {
   return typeof value === 'string' && value.trim() === '' ? undefined : value
 }
 
