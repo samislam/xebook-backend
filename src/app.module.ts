@@ -18,6 +18,7 @@ import { DebtBalancesModule } from '@/modules/debt-balances/debt-balances.module
 import { HeldBalancesModule } from '@/modules/held-balances/held-balances.module'
 import { RequestPreviewMiddleware } from '@/middlewares/request-preview.middleware'
 import { CounterpartiesModule } from '@/modules/counterparties/counterparties.module'
+import { PrismaDecimalInterceptor } from '@/common/interceptors/prisma-decimal.interceptor'
 import { InstitutionAccountsModule } from '@/modules/institution-accounts/institution-accounts.module'
 
 @Module({
@@ -55,6 +56,11 @@ import { InstitutionAccountsModule } from '@/modules/institution-accounts/instit
       // Normalize zod-based response serialization for routes that use serializer DTOs.
       provide: APP_INTERCEPTOR,
       useClass: ZodSerializerInterceptor,
+    },
+    {
+      // Convert Prisma Decimal values into JSON numbers before sending API responses.
+      provide: APP_INTERCEPTOR,
+      useClass: PrismaDecimalInterceptor,
     },
     {
       // Log and surface zod serialization errors through a shared exception filter.

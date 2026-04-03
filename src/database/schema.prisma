@@ -155,10 +155,10 @@ model InstitutionAccount {
   orderSettlementToRows   OrderSettlement[] @relation("OrderSettlementToAccount")
   orderSettlementFromRows OrderSettlement[] @relation("OrderSettlementFromAccount")
 
+  @@unique([userId, institutionId, currency, title])
   @@index([userId])
   @@index([institutionId])
   @@index([userId, currency])
-  @@unique([userId, institutionId, currency, title])
 }
 
 model HeldBalance {
@@ -198,35 +198,35 @@ model DebtBalance {
 }
 
 model Transaction {
-  id                String          @id @default(cuid())
-  type              TransactionType
-  method            TransferMethod  @default(BANK)
-  ownerUserId       String
-  initiatorUserId   String
-  fromUserId        String?
-  toUserId          String?
-  beneficiaryUserId String?
-  fromAccountId     String?
-  toAccountId       String?
+  id                 String          @id @default(cuid())
+  type               TransactionType
+  method             TransferMethod  @default(BANK)
+  ownerUserId        String
+  initiatorUserId    String
+  fromUserId         String?
+  toUserId           String?
+  beneficiaryUserId  String?
+  fromAccountId      String?
+  toAccountId        String?
   fromCounterpartyId String?
   toCounterpartyId   String?
-  amount            Decimal         @db.Decimal(20, 8)
-  currency          String          @db.VarChar(10)
-  referenceCode     String?
-  note              String?
-  occurredAt        DateTime
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  amount             Decimal         @db.Decimal(20, 8)
+  currency           String          @db.VarChar(10)
+  referenceCode      String?
+  note               String?
+  occurredAt         DateTime
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 
-  ownerUser        User               @relation("TransactionOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
-  initiatorUser    User               @relation("TransactionInitiator", fields: [initiatorUserId], references: [id], onDelete: Restrict)
-  fromUser         User?              @relation("TransactionFromUser", fields: [fromUserId], references: [id], onDelete: Restrict)
-  toUser           User?              @relation("TransactionToUser", fields: [toUserId], references: [id], onDelete: Restrict)
-  beneficiaryUser  User?              @relation("TransactionBeneficiary", fields: [beneficiaryUserId], references: [id], onDelete: Restrict)
+  ownerUser        User                @relation("TransactionOwner", fields: [ownerUserId], references: [id], onDelete: Restrict)
+  initiatorUser    User                @relation("TransactionInitiator", fields: [initiatorUserId], references: [id], onDelete: Restrict)
+  fromUser         User?               @relation("TransactionFromUser", fields: [fromUserId], references: [id], onDelete: Restrict)
+  toUser           User?               @relation("TransactionToUser", fields: [toUserId], references: [id], onDelete: Restrict)
+  beneficiaryUser  User?               @relation("TransactionBeneficiary", fields: [beneficiaryUserId], references: [id], onDelete: Restrict)
   fromAccount      InstitutionAccount? @relation("TransactionFromAccount", fields: [fromAccountId], references: [id], onDelete: SetNull)
   toAccount        InstitutionAccount? @relation("TransactionToAccount", fields: [toAccountId], references: [id], onDelete: SetNull)
-  fromCounterparty Counterparty?      @relation("TransactionFromCounterparty", fields: [fromCounterpartyId], references: [id], onDelete: SetNull)
-  toCounterparty   Counterparty?      @relation("TransactionToCounterparty", fields: [toCounterpartyId], references: [id], onDelete: SetNull)
+  fromCounterparty Counterparty?       @relation("TransactionFromCounterparty", fields: [fromCounterpartyId], references: [id], onDelete: SetNull)
+  toCounterparty   Counterparty?       @relation("TransactionToCounterparty", fields: [toCounterpartyId], references: [id], onDelete: SetNull)
 
   @@index([ownerUserId, occurredAt])
   @@index([initiatorUserId, occurredAt])
@@ -284,11 +284,11 @@ model OrderSettlement {
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
-  order           Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  payerUser       User?              @relation("OrderSettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
-  payeeUser       User?              @relation("OrderSettlementPayee", fields: [payeeUserId], references: [id], onDelete: Restrict)
-  beneficiaryUser User?              @relation("OrderSettlementBeneficiary", fields: [beneficiaryUserId], references: [id], onDelete: Restrict)
-  toCounterparty  Counterparty?      @relation("OrderSettlementToCounterparty", fields: [toCounterpartyId], references: [id], onDelete: SetNull)
+  order           Order               @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  payerUser       User?               @relation("OrderSettlementPayer", fields: [payerUserId], references: [id], onDelete: Restrict)
+  payeeUser       User?               @relation("OrderSettlementPayee", fields: [payeeUserId], references: [id], onDelete: Restrict)
+  beneficiaryUser User?               @relation("OrderSettlementBeneficiary", fields: [beneficiaryUserId], references: [id], onDelete: Restrict)
+  toCounterparty  Counterparty?       @relation("OrderSettlementToCounterparty", fields: [toCounterpartyId], references: [id], onDelete: SetNull)
   toAccount       InstitutionAccount? @relation("OrderSettlementToAccount", fields: [toAccountId], references: [id], onDelete: SetNull)
   fromAccount     InstitutionAccount? @relation("OrderSettlementFromAccount", fields: [fromAccountId], references: [id], onDelete: SetNull)
 
