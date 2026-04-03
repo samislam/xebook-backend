@@ -1,0 +1,7 @@
+$kind: http-request
+name: 🔍 Get institution account by ID
+url: "{{mainApi}}/v1/institution-accounts/:id"
+method: GET
+pathVariables:
+  id: ""
+order: 3000

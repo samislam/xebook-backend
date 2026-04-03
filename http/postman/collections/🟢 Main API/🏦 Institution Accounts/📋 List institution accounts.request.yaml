@@ -1,0 +1,21 @@
+$kind: http-request
+name: 📋 List institution accounts
+url: "{{mainApi}}/v1/institution-accounts"
+method: GET
+queryParams:
+  - key: userId
+    value: ""
+    disabled: true
+  - key: institutionId
+    value: ""
+    disabled: true
+  - key: currency
+    value: USD
+    disabled: true
+  - key: isActive
+    value: "true"
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

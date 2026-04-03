@@ -1,0 +1,17 @@
+$kind: http-request
+name: ➕ Create institution account
+url: "{{mainApi}}/v1/institution-accounts"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "userId": "",
+        "institutionId": "",
+        "currency": "USD",
+        "title": "Main USD Account",
+        "accountIdentifier": "123456789",
+        "isActive": true,
+        "note": "Primary account for this user"
+    }
+order: 1000

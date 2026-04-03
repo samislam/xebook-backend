@@ -1,0 +1,17 @@
+$kind: http-request
+name: ✏️ Update institution account by ID
+url: "{{mainApi}}/v1/institution-accounts/:id"
+method: PATCH
+pathVariables:
+  id: ""
+body:
+  type: json
+  content: |-
+    {
+        "currency": "USD",
+        "title": "Main USD Account",
+        "accountIdentifier": "123456789",
+        "isActive": true,
+        "note": "Updated note"
+    }
+order: 4000
