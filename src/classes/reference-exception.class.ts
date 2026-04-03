@@ -21,4 +21,4 @@ export class ReferanceHttpException extends HttpException {
   }
 }
 
-const DEFAULT_MESSAGE = 'Incorrect Reference ID!'
+const DEFAULT_MESSAGE = 'Cannot complete this action because the record is still referenced by other records.'
