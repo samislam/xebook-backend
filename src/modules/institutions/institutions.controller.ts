@@ -10,8 +10,8 @@ export class InstitutionsController {
   constructor(private readonly institutionsService: InstitutionsService) {}
 
   @Post()
-  create(@Body() dto: CreateInstitutionDto) {
-    return this.institutionsService.create(dto)
+  async create(@Body() dto: CreateInstitutionDto) {
+    return { data: await this.institutionsService.create(dto) }
   }
 
   @Get()
@@ -20,17 +20,17 @@ export class InstitutionsController {
   }
 
   @Get(':id')
-  findOne(@Param() params: IdParamDto) {
-    return this.institutionsService.findOne(params.id)
+  async findOne(@Param() params: IdParamDto) {
+    return { data: await this.institutionsService.findOne(params.id) }
   }
 
   @Patch(':id')
-  update(@Param() params: IdParamDto, @Body() dto: UpdateInstitutionDto) {
-    return this.institutionsService.update(params.id, dto)
+  async update(@Param() params: IdParamDto, @Body() dto: UpdateInstitutionDto) {
+    return { data: await this.institutionsService.update(params.id, dto) }
   }
 
   @Delete(':id')
-  remove(@Param() params: IdParamDto) {
-    return this.institutionsService.remove(params.id)
+  async remove(@Param() params: IdParamDto) {
+    return { data: await this.institutionsService.remove(params.id) }
   }
 }

@@ -12,19 +12,19 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto)
+  async register(@Body() dto: RegisterDto) {
+    return { data: await this.authService.register(dto) }
   }
 
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto)
+  async login(@Body() dto: LoginDto) {
+    return { data: await this.authService.login(dto) }
   }
 
   @Get(['me', 'whoami'])
   me(@CurrentUser() user: JwtUser) {
-    return { user }
+    return { data: { user } }
   }
 }

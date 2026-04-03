@@ -1,17 +1,17 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
-import { IdParamDto } from '@/common/dto/id-param.dto'
-import { CreateOrderDto } from '@/orders/dto/create-order.dto'
-import { ListOrdersQueryDto } from '@/orders/dto/list-orders-query.dto'
-import { UpdateOrderDto } from '@/orders/dto/update-order.dto'
+import { IdParamDto } from '@/common/dtos/id-param.dto'
 import { OrdersService } from '@/orders/orders.service'
+import { CreateOrderDto } from '@/orders/dto/create-order.dto'
+import { UpdateOrderDto } from '@/orders/dto/update-order.dto'
+import { ListOrdersQueryDto } from '@/orders/dto/list-orders-query.dto'
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
 
 @Controller({ path: 'orders', version: '1' })
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() dto: CreateOrderDto) {
-    return this.ordersService.create(dto)
+  async create(@Body() dto: CreateOrderDto) {
+    return { data: await this.ordersService.create(dto) }
   }
 
   @Get()
@@ -20,12 +20,12 @@ export class OrdersController {
   }
 
   @Get(':id')
-  findOne(@Param() params: IdParamDto) {
-    return this.ordersService.findOne(params.id)
+  async findOne(@Param() params: IdParamDto) {
+    return { data: await this.ordersService.findOne(params.id) }
   }
 
   @Patch(':id')
-  update(@Param() params: IdParamDto, @Body() dto: UpdateOrderDto) {
-    return this.ordersService.update(params.id, dto)
+  async update(@Param() params: IdParamDto, @Body() dto: UpdateOrderDto) {
+    return { data: await this.ordersService.update(params.id, dto) }
   }
 }
