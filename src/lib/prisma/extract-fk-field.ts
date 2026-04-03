@@ -1,18 +1,20 @@
 /**
- * Extracts a foreign key field name from a Prisma constraint (e.g., FK_Product_Service →
- * serviceId). Falls back gracefully if pattern doesn't match.
+ * Extracts a foreign-key field name from common constraint naming styles.
  *
- * @param constraint  - The constraint name (e.g., 'FK_Product_Service')
- * @param fkPrefix    - Optional prefix to strip (default: 'FK_Product_')
- * @returns - E.g., 'serviceId' or undefined.
+ * Supported examples:
+ * - `Transaction_ownerUserId_fkey` -> `ownerUserId`
+ * - `FK_Product_Service` with prefix `FK_Product_` -> `serviceId`
  */
-export function extractFkFieldFromConstraint(
-  constraint: string,
-  fkPrefix: string
-): string | undefined {
-  if (!constraint.startsWith(fkPrefix)) return undefined
+export function extractFkFieldFromConstraint(constraint: string, fkPrefix?: string): string | undefined {
+  const prismaStyleMatch = constraint.match(/^[^_]+_(.+)_fkey$/)
+  if (prismaStyleMatch?.[1]) {
+    return prismaStyleMatch[1]
+  }
 
-  const field = constraint.replace(fkPrefix, '').replace(/^[A-Z]/, (c) => c.toLowerCase())
+  if (!fkPrefix || !constraint.startsWith(fkPrefix)) {
+    return undefined
+  }
 
+  const field = constraint.replace(fkPrefix, '').replace(/^[A-Z]/, (char) => char.toLowerCase())
   return field ? `${field}Id` : undefined
 }
