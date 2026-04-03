@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config'
 import { cleanupOpenApiDoc } from 'nestjs-zod'
 import { VersioningType } from '@nestjs/common'
 import { Environment } from './server/environment-schema'
+import { apiReference } from '@scalar/nestjs-api-reference'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 
 async function bootstrap() {
@@ -39,6 +40,15 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   })
+
+  app.use(
+    '/docs',
+    apiReference({
+      theme: 'default',
+      content: cleanupOpenApiDoc(openApiDoc),
+    })
+  )
+
   const configService = app.get(ConfigService<Environment, true>)
   const HOST = configService.get('HOST', { infer: true })
   const PORT = configService.get('PORT', { infer: true })
