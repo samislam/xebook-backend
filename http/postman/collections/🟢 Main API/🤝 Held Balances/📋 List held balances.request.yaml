@@ -1,0 +1,18 @@
+$kind: http-request
+name: 📋 List held balances
+url: "{{mainApi}}/v1/held-balances"
+method: GET
+queryParams:
+  - key: ownerUserId
+    value: cmniuc3qg0002fz0y5q1u4cm3
+    disabled: true
+  - key: holderUserId
+    value: cmniuc7y00003fz0ye1ugt5lk
+    disabled: true
+  - key: currency
+    value: TRY
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 1000
