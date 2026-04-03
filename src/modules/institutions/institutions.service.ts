@@ -52,10 +52,7 @@ export class InstitutionsService {
 
   async findOne(id: string) {
     const institution = await this.database.institution.findUnique({ where: { id } })
-    if (!institution) {
-      throw new NotFoundException('Institution not found')
-    }
-
+    if (!institution) throw new NotFoundException('Institution not found')
     return institution
   }
 
