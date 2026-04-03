@@ -1,0 +1,7 @@
+$kind: http-request
+name: 🗑️ Delete counterparty by ID
+url: "{{mainApi}}/v1/counterparties/:id"
+method: DELETE
+pathVariables:
+  id: ""
+order: 5000

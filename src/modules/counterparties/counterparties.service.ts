@@ -66,4 +66,11 @@ export class CounterpartiesService {
       data: dto,
     })
   }
+
+  async remove(id: string) {
+    await this.findOne(id)
+    return this.database.counterparty.delete({
+      where: { id },
+    })
+  }
 }

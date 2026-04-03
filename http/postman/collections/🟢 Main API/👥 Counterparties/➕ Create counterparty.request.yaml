@@ -1,0 +1,14 @@
+$kind: http-request
+name: ➕ Create counterparty
+url: "{{mainApi}}/v1/counterparties"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "name": "Electricity Company",
+        "type": "COMPANY",
+        "phone": "+963999999999",
+        "note": "Monthly utility payment counterparty"
+    }
+order: 1000

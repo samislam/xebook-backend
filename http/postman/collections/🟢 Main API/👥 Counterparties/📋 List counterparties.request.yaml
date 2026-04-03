@@ -1,0 +1,15 @@
+$kind: http-request
+name: 📋 List counterparties
+url: "{{mainApi}}/v1/counterparties"
+method: GET
+queryParams:
+  - key: type
+    value: COMPANY
+    disabled: true
+  - key: search
+    value: electric
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

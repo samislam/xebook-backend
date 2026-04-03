@@ -1,6 +1,6 @@
 import { IdParamDto } from '@/common/dtos/id-param.dto'
 import { CounterpartiesService } from '@/counterparties/counterparties.service'
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { CreateCounterpartyDto } from '@/counterparties/dto/create-counterparty.dto'
 import { UpdateCounterpartyDto } from '@/counterparties/dto/update-counterparty.dto'
 import { ListCounterpartiesQueryDto } from '@/counterparties/dto/list-counterparties-query.dto'
@@ -27,5 +27,10 @@ export class CounterpartiesController {
   @Patch(':id')
   async update(@Param() params: IdParamDto, @Body() dto: UpdateCounterpartyDto) {
     return { data: await this.counterpartiesService.update(params.id, dto) }
+  }
+
+  @Delete(':id')
+  async remove(@Param() params: IdParamDto) {
+    return { data: await this.counterpartiesService.remove(params.id) }
   }
 }
