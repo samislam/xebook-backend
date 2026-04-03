@@ -1,4 +1,5 @@
 $kind: collection
+name: 🟢 Main API
 variables:
   access_token: ""
 auth:
