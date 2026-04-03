@@ -1,10 +1,11 @@
 import { Controller, Get, Query } from '@nestjs/common'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 import * as openapi from '@/debt-balances/debt-balances.openapi'
 import { DebtBalancesService } from '@/debt-balances/debt-balances.service'
 import { ListDebtBalancesQueryDto } from '@/debt-balances/dto/list-debt-balances-query.dto'
 
 @ApiTags('Debt Balances')
+@ApiBearerAuth()
 @Controller({ path: 'debt-balances', version: '1' })
 export class DebtBalancesController {
   constructor(private readonly debtBalancesService: DebtBalancesService) {}

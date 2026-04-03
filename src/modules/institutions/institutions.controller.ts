@@ -1,13 +1,14 @@
 import { IdParamDto } from '@/common/dtos/id-param.dto'
 import * as openapi from '@/institutions/institutions.openapi'
 import { InstitutionsService } from '@/institutions/institutions.service'
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { CreateInstitutionDto } from '@/institutions/dto/create-institution.dto'
 import { UpdateInstitutionDto } from '@/institutions/dto/update-institution.dto'
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ListInstitutionsQueryDto } from '@/institutions/dto/list-institutions-query.dto'
 
 @ApiTags('Institutions')
+@ApiBearerAuth()
 @Controller({ path: 'institutions', version: '1' })
 export class InstitutionsController {
   constructor(private readonly institutionsService: InstitutionsService) {}

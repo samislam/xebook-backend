@@ -1,5 +1,5 @@
 import { IdParamDto } from '@/common/dtos/id-param.dto'
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import * as openapi from '@/institution-accounts/institution-accounts.openapi'
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { InstitutionAccountsService } from '@/institution-accounts/institution-accounts.service'
@@ -8,6 +8,7 @@ import { UpdateInstitutionAccountDto } from '@/institution-accounts/dto/update-i
 import { ListInstitutionAccountsQueryDto } from '@/institution-accounts/dto/list-institution-accounts-query.dto'
 
 @ApiTags('Institution Accounts')
+@ApiBearerAuth()
 @Controller({ path: 'institution-accounts', version: '1' })
 export class InstitutionAccountsController {
   constructor(private readonly institutionAccountsService: InstitutionAccountsService) {}

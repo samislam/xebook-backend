@@ -4,10 +4,11 @@ import { OrdersService } from '@/orders/orders.service'
 import { CreateOrderDto } from '@/orders/dto/create-order.dto'
 import { UpdateOrderDto } from '@/orders/dto/update-order.dto'
 import { ListOrdersQueryDto } from '@/orders/dto/list-orders-query.dto'
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
 
 @ApiTags('Orders')
+@ApiBearerAuth()
 @Controller({ path: 'orders', version: '1' })
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}

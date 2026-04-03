@@ -2,13 +2,14 @@ import * as openapi from '@/users/users.openapi'
 import { JwtUser } from '@/auth/types/jwt-user.type'
 import { UsersService } from '@/users/users.service'
 import { UpdateUserDto } from '@/users/dto/update-user.dto'
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { Body, Controller, Get, Patch, Post } from '@nestjs/common'
 import { ChangePasswordDto } from '@/users/dto/change-password.dto'
 import { ChangeUsernameDto } from '@/users/dto/change-username.dto'
 import { CurrentUser } from '@/common/decorators/current-user.decorator'
 
 @ApiTags('Me')
+@ApiBearerAuth()
 @Controller({ path: 'me', version: '1' })
 export class MeController {
   constructor(private readonly usersService: UsersService) {}

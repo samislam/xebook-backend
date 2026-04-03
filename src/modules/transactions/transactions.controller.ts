@@ -4,11 +4,12 @@ import * as openapi from '@/transactions/transactions.openapi'
 import { CurrentUser } from '@/common/decorators/current-user.decorator'
 import { TransactionsService } from '@/transactions/transactions.service'
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { CreateTransactionDto } from '@/transactions/dto/create-transaction.dto'
 import { ListTransactionsQueryDto } from '@/transactions/dto/list-transactions-query.dto'
 
 @ApiTags('Transactions')
+@ApiBearerAuth()
 @Controller({ path: 'transactions', version: '1' })
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}

@@ -3,7 +3,7 @@ import { LoginDto } from '@/auth/dto/login.dto'
 import { AuthService } from '@/auth/auth.service'
 import { JwtUser } from '@/auth/types/jwt-user.type'
 import { RegisterDto } from '@/auth/dto/register.dto'
-import { ApiOperation, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { Public } from '@/common/decorators/public.decorator'
 import { CurrentUser } from '@/common/decorators/current-user.decorator'
 import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common'
@@ -28,6 +28,7 @@ export class AuthController {
     return { data: await this.authService.login(dto) }
   }
 
+  @ApiBearerAuth()
   @ApiOperation(openapi.authMeOperation)
   @Get(['me', 'whoami'])
   me(@CurrentUser() user: JwtUser) {

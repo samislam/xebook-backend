@@ -1,6 +1,6 @@
 import { IdParamDto } from '@/common/dtos/id-param.dto'
 import * as openapi from '@/counterparties/counterparties.openapi'
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { CounterpartiesService } from '@/counterparties/counterparties.service'
 import { CreateCounterpartyDto } from '@/counterparties/dto/create-counterparty.dto'
 import { UpdateCounterpartyDto } from '@/counterparties/dto/update-counterparty.dto'
@@ -8,6 +8,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ListCounterpartiesQueryDto } from '@/counterparties/dto/list-counterparties-query.dto'
 
 @ApiTags('Counterparties')
+@ApiBearerAuth()
 @Controller({ path: 'counterparties', version: '1' })
 export class CounterpartiesController {
   constructor(private readonly counterpartiesService: CounterpartiesService) {}

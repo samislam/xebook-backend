@@ -6,11 +6,12 @@ import { UpdateUserDto } from '@/users/dto/update-user.dto'
 import { ChangeUsernameDto } from '@/users/dto/change-username.dto'
 import { ChangePasswordDto } from '@/users/dto/change-password.dto'
 import { ListUsersQueryDto } from '@/users/dto/list-users-query.dto'
-import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { CreateUserRequestDto } from '@/users/dto/create-user-request.dto'
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 
 @ApiTags('Users')
+@ApiBearerAuth()
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
