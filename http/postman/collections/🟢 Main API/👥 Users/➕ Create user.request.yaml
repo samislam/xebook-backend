@@ -1,12 +1,13 @@
 $kind: http-request
+name: ➕ Create user
 url: "{{mainApi}}/v1/users"
 method: POST
 body:
   type: json
   content: |-
     {
-        "name": "Islam",
-        "username": "islam",
+        "name": "user A",
+        "username": "user-a",
         "password": "123456789",
         "isActive": true
     }
