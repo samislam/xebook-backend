@@ -12,21 +12,28 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
+  app.enableVersioning({
+    defaultVersion: '1',
+    type: VersioningType.URI,
+  })
+
+  if (appConfig.apiPrefix) {
+    app.setGlobalPrefix(appConfig.apiPrefix)
+  }
+
   const openApiDoc = SwaggerModule.createDocument(
     app,
     new DocumentBuilder()
       .setTitle(appConfig.appName)
       .setDescription(appConfig.appDescription)
       .setVersion('1.0')
-      .build()
+      .build(),
+    {
+      ignoreGlobalPrefix: false,
+    }
   )
 
   SwaggerModule.setup(appConfig.apiPrefix, app, cleanupOpenApiDoc(openApiDoc))
-  app.enableVersioning({
-    defaultVersion: '1',
-    type: VersioningType.URI,
-  })
-  if (appConfig.apiPrefix) app.setGlobalPrefix(appConfig.apiPrefix)
   const configService = app.get(ConfigService<Environment, true>)
   const HOST = configService.get('HOST', { infer: true })
   const PORT = configService.get('PORT', { infer: true })
