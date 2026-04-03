@@ -1,6 +1,11 @@
 $kind: http-request
+name: 📋 List users
 url: "{{mainApi}}/v1/users"
 method: GET
+queryParams:
+  - key: isActive
+    value: "true"
+    disabled: true
 body:
   type: text
   content: |-
