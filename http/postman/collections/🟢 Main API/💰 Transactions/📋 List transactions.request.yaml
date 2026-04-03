@@ -1,0 +1,51 @@
+$kind: http-request
+name: 📋 List transactions
+url: "{{mainApi}}/v1/transactions"
+method: GET
+queryParams:
+  - key: ownerUserId
+    value: ""
+    disabled: true
+  - key: initiatorUserId
+    value: ""
+    disabled: true
+  - key: fromUserId
+    value: ""
+    disabled: true
+  - key: toUserId
+    value: ""
+    disabled: true
+  - key: beneficiaryUserId
+    value: ""
+    disabled: true
+  - key: fromAccountId
+    value: ""
+    disabled: true
+  - key: toAccountId
+    value: ""
+    disabled: true
+  - key: fromCounterpartyId
+    value: ""
+    disabled: true
+  - key: toCounterpartyId
+    value: ""
+    disabled: true
+  - key: currency
+    value: USD
+    disabled: true
+  - key: type
+    value: CASH_TO_USER_HOLD
+    disabled: true
+  - key: method
+    value: CASH
+    disabled: true
+  - key: occurredFrom
+    value: "2026-04-01T00:00:00.000Z"
+    disabled: true
+  - key: occurredTo
+    value: "2026-04-30T23:59:59.999Z"
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

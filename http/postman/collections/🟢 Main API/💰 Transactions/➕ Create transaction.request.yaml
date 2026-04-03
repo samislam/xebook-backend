@@ -1,0 +1,25 @@
+$kind: http-request
+name: ➕ Create transaction
+url: "{{mainApi}}/v1/transactions"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "type": "CASH_TO_USER_HOLD",
+        "method": "CASH",
+        "ownerUserId": "",
+        "fromUserId": "",
+        "toUserId": "",
+        "beneficiaryUserId": "",
+        "fromAccountId": "",
+        "toAccountId": "",
+        "fromCounterpartyId": "",
+        "toCounterpartyId": "",
+        "amount": "1000",
+        "currency": "USD",
+        "referenceCode": "",
+        "note": "Cash handed to user to hold",
+        "occurredAt": "2026-04-03T12:00:00.000Z"
+    }
+order: 1000

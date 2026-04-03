@@ -1,0 +1,7 @@
+$kind: http-request
+name: 🔍 Get transaction by ID
+url: "{{mainApi}}/v1/transactions/:id"
+method: GET
+pathVariables:
+  id: ""
+order: 3000
