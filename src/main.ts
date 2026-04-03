@@ -27,13 +27,18 @@ async function bootstrap() {
       .setTitle(appConfig.appName)
       .setDescription(appConfig.appDescription)
       .setVersion('1.0')
+      .addBearerAuth()
       .build(),
     {
       ignoreGlobalPrefix: false,
     }
   )
 
-  SwaggerModule.setup(appConfig.apiPrefix, app, cleanupOpenApiDoc(openApiDoc))
+  SwaggerModule.setup(appConfig.apiPrefix, app, cleanupOpenApiDoc(openApiDoc), {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  })
   const configService = app.get(ConfigService<Environment, true>)
   const HOST = configService.get('HOST', { infer: true })
   const PORT = configService.get('PORT', { infer: true })
