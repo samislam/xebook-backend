@@ -1,0 +1,7 @@
+$kind: http-request
+name: 🗑️ Delete institution account by ID
+url: "{{mainApi}}/v1/institution-accounts/:id"
+method: DELETE
+pathVariables:
+  id: ""
+order: 5000

@@ -78,6 +78,14 @@ export class InstitutionAccountsService {
     })
   }
 
+  async remove(id: string) {
+    await this.findOne(id)
+    return this.database.institutionAccount.delete({
+      where: { id },
+      include: this.accountInclude,
+    })
+  }
+
   private readonly accountInclude = {
     user: {
       select: {
