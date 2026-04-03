@@ -1,0 +1,15 @@
+$kind: http-request
+name: 📋 List institutions
+url: "{{mainApi}}/v1/institutions"
+method: GET
+queryParams:
+  - key: type
+    value: BANK
+    disabled: true
+  - key: search
+    value: bank
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

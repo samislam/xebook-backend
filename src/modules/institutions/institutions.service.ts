@@ -66,4 +66,11 @@ export class InstitutionsService {
       data: dto,
     })
   }
+
+  async remove(id: string) {
+    await this.findOne(id)
+    return this.database.institution.delete({
+      where: { id },
+    })
+  }
 }

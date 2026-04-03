@@ -1,0 +1,13 @@
+$kind: http-request
+name: ➕ Create institution
+url: "{{mainApi}}/v1/institutions"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "name": "Bank of Damascus",
+        "country": "SY",
+        "type": "BANK"
+    }
+order: 1000

@@ -1,0 +1,15 @@
+$kind: http-request
+name: ✏️ Update institution by ID
+url: "{{mainApi}}/v1/institutions/:id"
+method: PATCH
+pathVariables:
+  id: ""
+body:
+  type: json
+  content: |-
+    {
+        "name": "Bank of Damascus",
+        "country": "SY",
+        "type": "BANK"
+    }
+order: 4000

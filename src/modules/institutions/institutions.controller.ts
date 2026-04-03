@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
-import { IdParamDto } from '@/common/dto/id-param.dto'
-import { CreateInstitutionDto } from '@/institutions/dto/create-institution.dto'
-import { ListInstitutionsQueryDto } from '@/institutions/dto/list-institutions-query.dto'
-import { UpdateInstitutionDto } from '@/institutions/dto/update-institution.dto'
+import { IdParamDto } from '@/common/dtos/id-param.dto'
 import { InstitutionsService } from '@/institutions/institutions.service'
+import { CreateInstitutionDto } from '@/institutions/dto/create-institution.dto'
+import { UpdateInstitutionDto } from '@/institutions/dto/update-institution.dto'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { ListInstitutionsQueryDto } from '@/institutions/dto/list-institutions-query.dto'
 
 @Controller({ path: 'institutions', version: '1' })
 export class InstitutionsController {
@@ -27,5 +27,10 @@ export class InstitutionsController {
   @Patch(':id')
   update(@Param() params: IdParamDto, @Body() dto: UpdateInstitutionDto) {
     return this.institutionsService.update(params.id, dto)
+  }
+
+  @Delete(':id')
+  remove(@Param() params: IdParamDto) {
+    return this.institutionsService.remove(params.id)
   }
 }
