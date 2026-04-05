@@ -1,0 +1,16 @@
+$kind: http-request
+name: ➕ Create rate snapshot
+url: "{{mainApi}}/v1/rate-snapshots"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "baseCurrency": "USD",
+      "quoteCurrency": "TRY",
+      "rate": "44.30",
+      "source": "REFERENCE",
+      "note": "Reference USD/TRY rate for breakeven calculations",
+      "capturedAt": "2026-04-05T12:00:00.000Z"
+    }
+order: 1000

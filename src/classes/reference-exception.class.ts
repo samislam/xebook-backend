@@ -21,4 +21,5 @@ export class ReferanceHttpException extends HttpException {
   }
 }
 
-const DEFAULT_MESSAGE = 'Cannot complete this action because the record is still referenced by other records.'
+const DEFAULT_MESSAGE =
+  'Cannot complete this action because the record is still referenced by other records.'

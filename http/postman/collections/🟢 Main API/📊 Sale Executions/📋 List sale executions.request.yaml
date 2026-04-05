@@ -1,0 +1,18 @@
+$kind: http-request
+name: 📋 List sale executions
+url: "{{mainApi}}/v1/sale-executions"
+method: GET
+queryParams:
+  - key: ownerUserId
+    value: cmnamgveq0000fz6qxy5zeq2s
+    disabled: true
+  - key: assetCurrency
+    value: USDT
+    disabled: true
+  - key: proceedsCurrency
+    value: TRY
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

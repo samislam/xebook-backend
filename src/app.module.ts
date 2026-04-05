@@ -7,8 +7,11 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard'
 import { OrdersModule } from '@/modules/orders/orders.module'
 import { HttpExceptionFilter } from '@/common/filters/zod.filter'
 import { environmentVarsSchema } from '@/server/environment-schema'
+import { RateSnapshotsModule } from '@/modules/rate-snapshots/rate-snapshots.module'
 import { BalancesModule } from '@/modules/balances/balances.module'
+import { InventoryLotsModule } from '@/modules/inventory-lots/inventory-lots.module'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { SaleExecutionsModule } from '@/modules/sale-executions/sale-executions.module'
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod'
 import { RequestUserMiddleware } from '@/middlewares/request-user.middleware'
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core'
@@ -34,6 +37,9 @@ import { InstitutionAccountsModule } from '@/modules/institution-accounts/instit
     UsersModule,
     OrdersModule,
     BalancesModule,
+    RateSnapshotsModule,
+    InventoryLotsModule,
+    SaleExecutionsModule,
     InstitutionsModule,
     HeldBalancesModule,
     DebtBalancesModule,

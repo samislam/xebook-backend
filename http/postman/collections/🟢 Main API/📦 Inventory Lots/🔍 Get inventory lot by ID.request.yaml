@@ -1,0 +1,8 @@
+$kind: http-request
+name: 🔍 Get inventory lot by ID
+url: "{{mainApi}}/v1/inventory-lots/:id"
+method: GET
+body:
+  type: text
+  content: ""
+order: 3000

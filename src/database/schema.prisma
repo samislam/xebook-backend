@@ -73,6 +73,17 @@ enum SettlementStatus {
   CANCELLED
 }
 
+enum CostBasisMethod {
+  FIFO
+  WEIGHTED_AVERAGE
+}
+
+enum RateSource {
+  MANUAL
+  MARKET
+  REFERENCE
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -102,6 +113,9 @@ model User {
   orderSettlementPayerRows       OrderSettlement[] @relation("OrderSettlementPayer")
   orderSettlementPayeeRows       OrderSettlement[] @relation("OrderSettlementPayee")
   orderSettlementBeneficiaryRows OrderSettlement[] @relation("OrderSettlementBeneficiary")
+
+  inventoryLots   InventoryLot[] @relation("InventoryLotOwner")
+  saleExecutions  SaleExecution[] @relation("SaleExecutionOwner")
 }
 
 model Counterparty {
@@ -117,6 +131,7 @@ model Counterparty {
   outgoingTransactions Transaction[] @relation("TransactionToCounterparty")
 
   orderSettlementRows OrderSettlement[] @relation("OrderSettlementToCounterparty")
+  saleExecutions      SaleExecution[]
 
   @@index([name])
 }
@@ -154,6 +169,7 @@ model InstitutionAccount {
 
   orderSettlementToRows   OrderSettlement[] @relation("OrderSettlementToAccount")
   orderSettlementFromRows OrderSettlement[] @relation("OrderSettlementFromAccount")
+  saleExecutions          SaleExecution[] @relation("SaleExecutionSettlementAccount")
 
   @@unique([userId, institutionId, currency, title])
   @@index([userId])
@@ -300,4 +316,93 @@ model OrderSettlement {
   @@index([toAccountId, createdAt])
   @@index([fromAccountId, createdAt])
   @@index([currency, createdAt])
+}
+
+model RateSnapshot {
+  id             String     @id @default(cuid())
+  baseCurrency   String     @db.VarChar(10)
+  quoteCurrency  String     @db.VarChar(10)
+  rate           Decimal    @db.Decimal(20, 8)
+  source         RateSource @default(MANUAL)
+  recorderUserId String?
+  note           String?
+  capturedAt     DateTime
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([baseCurrency, quoteCurrency, capturedAt])
+  @@index([quoteCurrency, capturedAt])
+}
+
+model InventoryLot {
+  id                String   @id @default(cuid())
+  ownerUserId       String
+  assetCurrency     String   @db.VarChar(10)
+  quantityAcquired  Decimal  @db.Decimal(20, 8)
+  remainingQuantity Decimal  @db.Decimal(20, 8)
+  costCurrency      String   @db.VarChar(10)
+  totalCostAmount   Decimal  @db.Decimal(20, 8)
+  unitCostAmount    Decimal  @db.Decimal(20, 8)
+  sourceOrderId     String?
+  sourceTransactionId String?
+  acquiredAt        DateTime
+  note              String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  ownerUser   User                @relation("InventoryLotOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  allocations SaleLotAllocation[]
+
+  @@index([ownerUserId, assetCurrency, acquiredAt])
+  @@index([assetCurrency, acquiredAt])
+  @@index([costCurrency, acquiredAt])
+}
+
+model SaleExecution {
+  id                  String          @id @default(cuid())
+  ownerUserId         String
+  counterpartyId      String?
+  settlementAccountId String?
+  assetCurrency       String          @db.VarChar(10)
+  quantitySold        Decimal         @db.Decimal(20, 8)
+  feeCurrency         String?         @db.VarChar(10)
+  feeAmount           Decimal?        @db.Decimal(20, 8)
+  consumedQuantity    Decimal         @db.Decimal(20, 8)
+  proceedsCurrency    String          @db.VarChar(10)
+  proceedsAmount      Decimal         @db.Decimal(20, 8)
+  netProceedsAmount   Decimal         @db.Decimal(20, 8)
+  unitSalePrice       Decimal         @db.Decimal(20, 8)
+  costBasisMethod     CostBasisMethod @default(FIFO)
+  costBasisCurrency   String?         @db.VarChar(10)
+  costBasisAmount     Decimal?        @db.Decimal(20, 8)
+  realizedProfitAmount Decimal?       @db.Decimal(20, 8)
+  occurredAt          DateTime
+  note                String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  ownerUser         User                @relation("SaleExecutionOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  counterparty      Counterparty?       @relation(fields: [counterpartyId], references: [id], onDelete: SetNull)
+  settlementAccount InstitutionAccount? @relation("SaleExecutionSettlementAccount", fields: [settlementAccountId], references: [id], onDelete: SetNull)
+  allocations       SaleLotAllocation[]
+
+  @@index([ownerUserId, assetCurrency, occurredAt])
+  @@index([counterpartyId, occurredAt])
+  @@index([settlementAccountId, occurredAt])
+  @@index([proceedsCurrency, occurredAt])
+}
+
+model SaleLotAllocation {
+  id              String   @id @default(cuid())
+  saleExecutionId String
+  inventoryLotId  String
+  quantityAllocated Decimal @db.Decimal(20, 8)
+  costAmount      Decimal  @db.Decimal(20, 8)
+  createdAt       DateTime @default(now())
+
+  saleExecution SaleExecution @relation(fields: [saleExecutionId], references: [id], onDelete: Cascade)
+  inventoryLot  InventoryLot  @relation(fields: [inventoryLotId], references: [id], onDelete: Restrict)
+
+  @@unique([saleExecutionId, inventoryLotId])
+  @@index([inventoryLotId])
 }

@@ -1,0 +1,21 @@
+$kind: http-request
+name: ➕ Create order settlement
+url: "{{mainApi}}/v1/order-settlements"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "orderId": "",
+      "kind": "PAYMENT",
+      "status": "PAID",
+      "payerUserId": "cmniuc3qg0002fz0y5q1u4cm3",
+      "payeeUserId": "cmniuc7y00003fz0ye1ugt5lk",
+      "toAccountId": "cmniur4t50005fzadq4fknrp7",
+      "method": "BANK",
+      "currency": "TRY",
+      "amount": "20000",
+      "paidAt": "2026-04-05T12:00:00.000Z",
+      "note": "Partial order payment"
+    }
+order: 1000

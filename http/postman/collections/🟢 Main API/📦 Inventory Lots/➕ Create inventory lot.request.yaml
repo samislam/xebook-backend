@@ -1,0 +1,17 @@
+$kind: http-request
+name: ➕ Create inventory lot
+url: "{{mainApi}}/v1/inventory-lots"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "ownerUserId": "cmnamgveq0000fz6qxy5zeq2s",
+      "assetCurrency": "USDT",
+      "quantityAcquired": "3000",
+      "costCurrency": "TRY",
+      "totalCostAmount": "138800",
+      "acquiredAt": "2026-04-05T12:00:00.000Z",
+      "note": "Bought 3000 USDT for 138800 TRY"
+    }
+order: 1000

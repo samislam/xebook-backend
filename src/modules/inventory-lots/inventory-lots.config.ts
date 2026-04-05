@@ -1,0 +1,57 @@
+import { Prisma } from '@/generated/prisma'
+import { createResourceConfig } from '@/common/utils/create-resource-config'
+
+export const inventoryLotsResourceConfig = createResourceConfig<
+  Prisma.InventoryLotScalarFieldEnum,
+  Prisma.InventoryLotWhereInput
+>({
+  allowedSortBy: [
+    'id',
+    'assetCurrency',
+    'costCurrency',
+    'quantityAcquired',
+    'remainingQuantity',
+    'totalCostAmount',
+    'unitCostAmount',
+    'acquiredAt',
+    'createdAt',
+    'updatedAt',
+  ],
+  allowedSelect: [
+    'id',
+    'ownerUserId',
+    'assetCurrency',
+    'quantityAcquired',
+    'remainingQuantity',
+    'costCurrency',
+    'totalCostAmount',
+    'unitCostAmount',
+    'sourceOrderId',
+    'sourceTransactionId',
+    'acquiredAt',
+    'note',
+    'createdAt',
+    'updatedAt',
+  ],
+  defaultSelect: [
+    'id',
+    'ownerUserId',
+    'assetCurrency',
+    'quantityAcquired',
+    'remainingQuantity',
+    'costCurrency',
+    'totalCostAmount',
+    'unitCostAmount',
+    'sourceOrderId',
+    'sourceTransactionId',
+    'acquiredAt',
+    'note',
+    'createdAt',
+    'updatedAt',
+  ],
+  enforcedSelect: ['id'],
+  defaultSortBy: 'acquiredAt',
+  defaultSortOrder: 'desc',
+  tieBreakerField: 'id',
+  tieBreakerOrder: 'asc',
+})

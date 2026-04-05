@@ -1,0 +1,12 @@
+$kind: http-request
+name: ✏️ Update order by ID
+url: "{{mainApi}}/v1/orders/:id"
+method: PATCH
+body:
+  type: json
+  content: |-
+    {
+      "status": "PARTIALLY_SETTLED",
+      "note": "Updated order note"
+    }
+order: 4000

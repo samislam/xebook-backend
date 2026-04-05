@@ -1,0 +1,19 @@
+$kind: http-request
+name: ➕ Create sale execution
+url: "{{mainApi}}/v1/sale-executions"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "ownerUserId": "cmnamgveq0000fz6qxy5zeq2s",
+      "assetCurrency": "USDT",
+      "quantitySold": "1000",
+      "feeCurrency": "USDT",
+      "feeAmount": "2",
+      "proceedsCurrency": "TRY",
+      "proceedsAmount": "49000",
+      "occurredAt": "2026-04-05T13:00:00.000Z",
+      "note": "Sold 1000 USDT with 2 USDT platform fee"
+    }
+order: 1000

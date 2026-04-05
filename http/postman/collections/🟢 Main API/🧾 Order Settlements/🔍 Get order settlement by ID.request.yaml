@@ -1,0 +1,8 @@
+$kind: http-request
+name: 🔍 Get order settlement by ID
+url: "{{mainApi}}/v1/order-settlements/:id"
+method: GET
+body:
+  type: text
+  content: ""
+order: 3000

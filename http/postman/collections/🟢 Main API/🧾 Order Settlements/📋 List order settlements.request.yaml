@@ -1,0 +1,18 @@
+$kind: http-request
+name: 📋 List order settlements
+url: "{{mainApi}}/v1/order-settlements"
+method: GET
+queryParams:
+  - key: orderId
+    value: ""
+    disabled: true
+  - key: status
+    value: PAID
+    disabled: true
+  - key: currency
+    value: TRY
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

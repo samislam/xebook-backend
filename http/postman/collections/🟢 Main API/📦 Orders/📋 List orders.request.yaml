@@ -1,0 +1,21 @@
+$kind: http-request
+name: 📋 List orders
+url: "{{mainApi}}/v1/orders"
+method: GET
+queryParams:
+  - key: buyerUserId
+    value: cmniuc3qg0002fz0y5q1u4cm3
+    disabled: true
+  - key: sellerUserId
+    value: cmniuc7y00003fz0ye1ugt5lk
+    disabled: true
+  - key: currency
+    value: TRY
+    disabled: true
+  - key: status
+    value: PENDING_PAYMENT
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

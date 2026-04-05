@@ -1,0 +1,8 @@
+$kind: http-request
+name: 🔍 Get order by ID
+url: "{{mainApi}}/v1/orders/:id"
+method: GET
+body:
+  type: text
+  content: ""
+order: 3000

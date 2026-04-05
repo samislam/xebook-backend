@@ -1,0 +1,18 @@
+$kind: http-request
+name: 📋 List rate snapshots
+url: "{{mainApi}}/v1/rate-snapshots"
+method: GET
+queryParams:
+  - key: baseCurrency
+    value: USD
+    disabled: true
+  - key: quoteCurrency
+    value: TRY
+    disabled: true
+  - key: source
+    value: REFERENCE
+    disabled: true
+body:
+  type: text
+  content: ""
+order: 2000

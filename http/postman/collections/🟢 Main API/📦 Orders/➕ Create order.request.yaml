@@ -1,0 +1,17 @@
+$kind: http-request
+name: ➕ Create order
+url: "{{mainApi}}/v1/orders"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "buyerUserId": "cmniuc3qg0002fz0y5q1u4cm3",
+      "sellerUserId": "cmniuc7y00003fz0ye1ugt5lk",
+      "baseCurrency": "USDT",
+      "baseAmount": "3000",
+      "quoteCurrency": "TRY",
+      "quoteAmount": "138800",
+      "note": "User A buys 3000 USDT from User B"
+    }
+order: 1000
