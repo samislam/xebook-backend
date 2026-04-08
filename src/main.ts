@@ -9,6 +9,7 @@ import { VersioningType } from '@nestjs/common'
 import { Environment } from './server/environment-schema'
 import { apiReference } from '@scalar/nestjs-api-reference'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+import { cleanupSdkOpenApiDoc } from '@/common/openapi/cleanup-openapi-doc'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -42,7 +43,9 @@ async function bootstrap() {
     }
   )
 
-  SwaggerModule.setup(appConfig.apiPrefix, app, cleanupOpenApiDoc(openApiDoc), {
+  const cleanedOpenApiDoc = cleanupSdkOpenApiDoc(cleanupOpenApiDoc(openApiDoc, { version: '3.0' }))
+
+  SwaggerModule.setup(appConfig.apiPrefix, app, cleanedOpenApiDoc, {
     swaggerOptions: {
       persistAuthorization: true,
     },
@@ -52,7 +55,7 @@ async function bootstrap() {
     '/docs',
     apiReference({
       theme: 'default',
-      content: cleanupOpenApiDoc(openApiDoc),
+      content: cleanedOpenApiDoc,
     })
   )
 
