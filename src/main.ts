@@ -40,6 +40,14 @@ async function bootstrap() {
       .build(),
     {
       ignoreGlobalPrefix: false,
+      operationIdFactory: (controllerKey, methodKey, version) => {
+        const controller = controllerKey.replace('Controller', '')
+        const normalizedController = controller.charAt(0).toLowerCase() + controller.slice(1)
+        const rawVersion = Array.isArray(version) ? version[0] : version ?? '1'
+        const normalizedVersion = String(rawVersion).replace(/^v/i, '')
+        const normalizedMethod = methodKey.charAt(0).toUpperCase() + methodKey.slice(1)
+        return normalizedController + normalizedMethod + 'V' + normalizedVersion
+      },
     }
   )
 
