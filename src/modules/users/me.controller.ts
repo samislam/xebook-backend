@@ -1,12 +1,14 @@
+import { ZodResponse } from 'nestjs-zod'
 import * as openapi from '@/users/users.openapi'
 import { JwtUser } from '@/auth/types/jwt-user.type'
 import { UsersService } from '@/users/users.service'
 import { UpdateUserDto } from '@/users/dto/update-user.dto'
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 import { Body, Controller, Get, Patch, Post } from '@nestjs/common'
 import { ChangePasswordDto } from '@/users/dto/change-password.dto'
 import { ChangeUsernameDto } from '@/users/dto/change-username.dto'
 import { CurrentUser } from '@/common/decorators/current-user.decorator'
+import { WrappedUserResponseZodDto } from '@/users/dto/user-responses.dto'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger'
 
 @ApiTags('Me')
 @ApiBearerAuth()
@@ -15,6 +17,7 @@ export class MeController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation(openapi.meFindOperation)
+  @ZodResponse({ type: WrappedUserResponseZodDto, status: 200 })
   @Get()
   async findMe(@CurrentUser() user: JwtUser) {
     return { data: await this.usersService.findOne(user.sub) }
@@ -22,6 +25,7 @@ export class MeController {
 
   @ApiOperation(openapi.meUpdateOperation)
   @ApiBody(openapi.meUpdateBody)
+  @ZodResponse({ type: WrappedUserResponseZodDto, status: 200 })
   @Patch()
   async updateMe(@CurrentUser() user: JwtUser, @Body() dto: UpdateUserDto) {
     return { data: await this.usersService.update(user.sub, dto) }
@@ -29,6 +33,7 @@ export class MeController {
 
   @ApiOperation(openapi.meChangePasswordOperation)
   @ApiBody(openapi.meChangePasswordBody)
+  @ZodResponse({ type: WrappedUserResponseZodDto, status: 200 })
   @Post('change-password')
   async changeMyPassword(@CurrentUser() user: JwtUser, @Body() dto: ChangePasswordDto) {
     return { data: await this.usersService.changePassword(user.sub, dto.password) }
@@ -36,6 +41,7 @@ export class MeController {
 
   @ApiOperation(openapi.meChangeUsernameOperation)
   @ApiBody(openapi.meChangeUsernameBody)
+  @ZodResponse({ type: WrappedUserResponseZodDto, status: 200 })
   @Post('change-username')
   async changeMyUsername(@CurrentUser() user: JwtUser, @Body() dto: ChangeUsernameDto) {
     return { data: await this.usersService.changeUsername(user.sub, dto.username) }

@@ -1,12 +1,15 @@
+import { ZodResponse } from 'nestjs-zod'
 import { JwtUser } from '@/auth/types/jwt-user.type'
 import { IdParamDto } from '@/common/dtos/id-param.dto'
 import { CurrentUser } from '@/common/decorators/current-user.decorator'
 import * as openapi from '@/order-settlements/order-settlements.openapi'
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { OrderSettlementsService } from '@/order-settlements/order-settlements.service'
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 import { CreateOrderSettlementDto } from '@/order-settlements/dto/create-order-settlement.dto'
 import { ListOrderSettlementsQueryDto } from '@/order-settlements/dto/list-order-settlements-query.dto'
+import { WrappedOrderSettlementResponseZodDto } from '@/order-settlements/dto/order-settlement-responses.dto'
+import { PaginatedOrderSettlementResponseZodDto } from '@/order-settlements/dto/order-settlement-responses.dto'
 
 @ApiTags('Order Settlements')
 @ApiBearerAuth()
@@ -16,12 +19,14 @@ export class OrderSettlementsController {
 
   @ApiOperation(openapi.orderSettlementsCreateOperation)
   @ApiBody(openapi.orderSettlementsCreateBody)
+  @ZodResponse({ type: WrappedOrderSettlementResponseZodDto, status: 201 })
   @Post()
   async create(@Body() dto: CreateOrderSettlementDto, @CurrentUser() user: JwtUser) {
     return { data: await this.orderSettlementsService.create(dto, user.sub) }
   }
 
   @ApiOperation(openapi.orderSettlementsListOperation)
+  @ZodResponse({ type: PaginatedOrderSettlementResponseZodDto, status: 200 })
   @Get()
   list(@Query() query: ListOrderSettlementsQueryDto) {
     return this.orderSettlementsService.list(query)
@@ -29,6 +34,7 @@ export class OrderSettlementsController {
 
   @ApiOperation(openapi.orderSettlementsFindOneOperation)
   @ApiParam(openapi.orderSettlementIdParam)
+  @ZodResponse({ type: WrappedOrderSettlementResponseZodDto, status: 200 })
   @Get(':id')
   async findOne(@Param() params: IdParamDto) {
     return { data: await this.orderSettlementsService.findOne(params.id) }
